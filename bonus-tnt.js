@@ -350,6 +350,7 @@ const bonusTnt = (() => {
     cancelAnimationFrame(rafId);
     document.removeEventListener('keydown', onKeyDown);
     document.removeEventListener('keyup',   onKeyUp);
+    if (!canvas) return;
     canvas.removeEventListener('touchstart', onTouchStart);
     canvas.removeEventListener('touchend',   onTouchEnd);
     canvas.removeEventListener('touchmove',  onTouchMove);

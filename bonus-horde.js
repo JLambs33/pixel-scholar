@@ -388,6 +388,7 @@ const bonusHorde = (() => {
   // ── cleanup ───────────────────────────────────────────────────
   function cleanup() {
     cancelAnimationFrame(rafId);
+    if (!canvas) return;
     canvas.removeEventListener('mousedown',  onShoot);
     canvas.removeEventListener('touchstart', onShoot);
   }
