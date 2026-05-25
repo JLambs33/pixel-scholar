@@ -283,6 +283,20 @@ const bonusHorde = (() => {
     ctx.shadowColor = 'transparent'; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
   }
 
+  function drawMcHeart(x, y, b, filled) {
+    ctx.fillStyle = filled ? '#FF2222' : '#3A3A3A';
+    ctx.fillRect(x + b,     y,         b * 2, b);
+    ctx.fillRect(x + b * 4, y,         b * 2, b);
+    ctx.fillRect(x,         y + b,     b * 6, b);
+    ctx.fillRect(x,         y + b * 2, b * 6, b);
+    ctx.fillRect(x + b,     y + b * 3, b * 4, b);
+    ctx.fillRect(x + b * 2, y + b * 4, b * 2, b);
+    if (filled) {
+      ctx.fillStyle = '#FF7777';
+      ctx.fillRect(x + b, y + b, b, b);
+    }
+  }
+
   function drawHUD() {
     ctx.textBaseline = 'top';
     ctx.textAlign    = 'left';
@@ -291,19 +305,16 @@ const bonusHorde = (() => {
       ctx.fillStyle = '#FFFFA5';
       ctx.fillText('MOBS: ' + score, 12, 12);
     });
-    // Escape hearts
-    const hearts = MAX_ESCAPES - escapes;
-    let hx = CW - 12;
-    for (let i = 0; i < MAX_ESCAPES; i++) {
-      ctx.fillStyle = i < hearts ? '#CC2222' : '#444';
-      ctx.fillRect(hx - 10, 12, 10, 10);
-      hx -= 16;
+    // Lives remaining as Minecraft hearts (right-aligned)
+    const lives = MAX_ESCAPES - escapes;
+    const hSize = 2; // px per heart pixel
+    const heartW = hSize * 7; // heart is 7 blocks wide
+    const gap = 4;
+    let hx = CW - 14;
+    for (let i = MAX_ESCAPES - 1; i >= 0; i--) {
+      drawMcHeart(hx - heartW, 10, hSize, i < lives);
+      hx -= heartW + gap;
     }
-    shadowed(() => {
-      ctx.fillStyle = '#FF8888';
-      ctx.font = '7px "Press Start 2P", monospace';
-      ctx.fillText('ESCAPED', CW - 12 - MAX_ESCAPES * 16 - 4, 14);
-    });
 
     // Hint
     if (!dead && elapsed < 2.5) {

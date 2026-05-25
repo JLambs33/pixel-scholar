@@ -463,9 +463,9 @@ function renderBestScores() {
   const h  = getBestScore('horde');
   const t  = getBestScore('tnt');
   el.innerHTML =
-    `<span>Runner: <b>${r}</b> blocks</span>` +
-    `<span>Mob Horde: <b>${h}</b> mobs</span>` +
-    `<span>TNT Catch: <b>${t}</b> diamonds</span>`;
+    `<div class="best-score-row"><span class="best-label">Runner</span><span class="best-val">${r} blocks</span></div>` +
+    `<div class="best-score-row"><span class="best-label">Mob Horde</span><span class="best-val">${h} mobs</span></div>` +
+    `<div class="best-score-row"><span class="best-label">TNT Catch</span><span class="best-val">${t} diamonds</span></div>`;
 }
 
 // ============================================================
@@ -553,8 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bonus.stopGame();
     bonusHorde.stopGame();
     bonusTnt.stopGame();
-    if (isNewBest) renderBestScores();
-    showScreen('champion-screen');
+    showScreen(currentModule === 'reading' ? 'reading-screen' : 'parent-screen');
   }
   bonusHomeBtn.addEventListener('click',    onBonusHome);
   bonusHomeBtn.addEventListener('touchend', (e) => { e.preventDefault(); onBonusHome(); });
