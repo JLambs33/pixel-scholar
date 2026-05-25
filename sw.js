@@ -1,4 +1,4 @@
-const CACHE = 'pixelscholar-v0.1.29';
+const CACHE = 'pixelscholar-v0.2.0';
 
 const ASSETS = [
   './',
