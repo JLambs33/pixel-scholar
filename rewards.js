@@ -132,30 +132,6 @@ function drawMob(canvas, mob) {
 }
 
 // ============================================================
-//  revealMob — insert canvas + name into #champion-mob
-// ============================================================
-function revealMob(mobIndex) {
-  const mob = MOBS[mobIndex % MOBS.length];
-  const container = document.getElementById('champion-mob');
-  container.innerHTML = '';
-
-  const canvas = document.createElement('canvas');
-  canvas.style.cssText = 'display:block;margin:0 auto;image-rendering:pixelated;';
-  drawMob(canvas, mob);
-
-  // Pop-in animation via wrapper
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'animation:pop-in 500ms ease-out forwards;';
-  wrap.appendChild(canvas);
-  container.appendChild(wrap);
-
-  const label = document.createElement('p');
-  label.style.cssText = 'font-family:var(--font-main);font-size:12px;color:var(--mc-gold);text-shadow:2px 2px 0 #000;margin-top:12px;text-align:center;';
-  label.textContent = mob.name + '!';
-  container.appendChild(label);
-}
-
-// ============================================================
 //  triggerBlockBurst — particles fly out on correct answer
 // ============================================================
 const BURST_COLORS = [
@@ -196,4 +172,4 @@ function triggerBlockBurst() {
 // ============================================================
 //  Exports
 // ============================================================
-const rewards = { triggerBlockBurst, revealMob };
+const rewards = { triggerBlockBurst };

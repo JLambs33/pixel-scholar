@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="version-badge">v0.1.28</div>
+  <div id="version-badge">v0.1.29</div>
   <button id="home-btn" class="home-btn hidden">&#8962; Home</button>
 
   <!-- ===================== HOME SCREEN ===================== -->
@@ -187,11 +187,6 @@
       <button id="quit-btn" class="mc-button mc-button--small">&#10005; Quit</button>
     </div>
 
-    <div id="mob-tease" class="mob-tease">
-      <div class="mob-tease-box">?</div>
-      <p class="mob-tease-hint">Spell all the words to reveal the mystery mob!</p>
-    </div>
-
     <div id="game-area" class="game-area">
       <!-- Mechanic UI injected here by game.js -->
     </div>
@@ -205,16 +200,21 @@
       <p class="champion-subtitle" id="champion-subtitle">Spelling Champion!</p>
     </div>
 
-    <div id="champion-mob" class="champion-mob">
-      <!-- CSS pixel-art mob injected by rewards.js -->
-    </div>
-
     <div class="champion-score-panel panel">
       <p id="champion-score" class="champion-score-text"></p>
     </div>
 
+    <div id="bonus-picker" class="bonus-picker hidden">
+      <p class="bonus-picker-label">Choose your bonus game:</p>
+      <div class="bonus-picker-buttons">
+        <button id="bonus-runner-btn" class="mc-button mc-button--green bonus-pick-btn">&#127939; Runner</button>
+        <button id="bonus-horde-btn" class="mc-button mc-button--green bonus-pick-btn">&#127991; Mob Horde</button>
+        <button id="bonus-tnt-btn"   class="mc-button mc-button--green bonus-pick-btn">&#128163; TNT Catch</button>
+      </div>
+      <div id="best-scores" class="best-scores"></div>
+    </div>
+
     <div class="champion-buttons">
-      <button id="bonus-btn" class="mc-button mc-button--green hidden">&#127918; BONUS ROUND!</button>
       <button id="play-again-btn" class="mc-button mc-button--green">&#9658; Play Again</button>
       <button id="change-words-btn" class="mc-button">&#8592; Change Words</button>
     </div>
@@ -238,6 +238,8 @@
   <script src="speech.js"></script>
   <script src="rewards.js"></script>
   <script src="bonus.js"></script>
+  <script src="bonus-horde.js"></script>
+  <script src="bonus-tnt.js"></script>
   <script src="mobs.js"></script>
   <script src="reading-data.js"></script>
   <script src="reading.js"></script>

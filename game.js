@@ -437,23 +437,35 @@ function hideFeedback() {
 // ============================================================
 function endSession() {
   awaitingInput = false;
-  const mobIndex = getMobIndex();
-  incrementMobIndex();
-  const missed   = gs.wrongWords;
-  const perfect  = missed.length === 0;
+  const missed  = gs.wrongWords;
+  const perfect = missed.length === 0;
 
   document.getElementById('champion-title').textContent    = perfect ? 'YOU DID IT!' : 'NICE TRY!';
   document.getElementById('champion-subtitle').textContent = perfect ? 'Spelling Champion!' : 'Keep Practicing!';
   document.getElementById('champion-score').innerHTML =
     `${gs.correctCount} out of ${gs.words.length} words correct!` +
     (missed.length
-      ? `<br><br>Practice these:<br>${missed.map(w => w.toUpperCase()).join(', ')}`
-      : '<br><br>Perfect score! BONUS ROUND unlocked!');
-  document.getElementById('bonus-btn').classList.toggle('hidden', !perfect);
+      ? `<br><br>Spell all correctly to unlock a BONUS GAME!<br><br>Practice these:<br>${missed.map(w => w.toUpperCase()).join(', ')}`
+      : '');
+
   document.getElementById('play-again-btn').classList.toggle('hidden', perfect);
+  document.getElementById('bonus-picker').classList.toggle('hidden', !perfect);
+
+  if (perfect) renderBestScores();
+
   ambientMobs.stop();
-  rewards.revealMob(mobIndex);
   showScreen('champion-screen');
+}
+
+function renderBestScores() {
+  const el = document.getElementById('best-scores');
+  const r  = getBestScore('runner');
+  const h  = getBestScore('horde');
+  const t  = getBestScore('tnt');
+  el.innerHTML =
+    `<span>Runner: <b>${r}</b> blocks</span>` +
+    `<span>Mob Horde: <b>${h}</b> mobs</span>` +
+    `<span>TNT Catch: <b>${t}</b> diamonds</span>`;
 }
 
 // ============================================================
@@ -517,18 +529,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.getElementById('bonus-btn').addEventListener('click', () => {
+  function launchBonus(gameKey, gameModule) {
     showScreen('bonus-screen');
-    bonus.startGame(() => {
+    gameModule.startGame((finalScore) => {
+      const prev = getBestScore(gameKey);
+      if (finalScore > prev) {
+        setBestScore(gameKey, finalScore);
+        document.getElementById('bonus-home-btn').dataset.newBest = '1';
+      }
       document.getElementById('bonus-home-btn').classList.remove('hidden');
     });
-  });
+  }
+
+  document.getElementById('bonus-runner-btn').addEventListener('click', () => launchBonus('runner', bonus));
+  document.getElementById('bonus-horde-btn').addEventListener('click',  () => launchBonus('horde', bonusHorde));
+  document.getElementById('bonus-tnt-btn').addEventListener('click',    () => launchBonus('tnt',   bonusTnt));
 
   const bonusHomeBtn = document.getElementById('bonus-home-btn');
   function onBonusHome() {
+    const isNewBest = bonusHomeBtn.dataset.newBest === '1';
+    bonusHomeBtn.dataset.newBest = '';
     bonusHomeBtn.classList.add('hidden');
     bonus.stopGame();
-    showScreen(currentModule === 'reading' ? 'reading-screen' : 'parent-screen');
+    bonusHorde.stopGame();
+    bonusTnt.stopGame();
+    if (isNewBest) renderBestScores();
+    showScreen('champion-screen');
   }
   bonusHomeBtn.addEventListener('click',    onBonusHome);
   bonusHomeBtn.addEventListener('touchend', (e) => { e.preventDefault(); onBonusHome(); });
