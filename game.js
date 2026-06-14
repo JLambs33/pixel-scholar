@@ -457,15 +457,25 @@ function endSession() {
   showScreen('champion-screen');
 }
 
+const GAME_UNITS = { runner: 'blocks', horde: 'mobs', elytra: 'points' };
+
+function bestScoresHTML() {
+  return [
+    ['Runner',    'runner', 'blocks'],
+    ['Mob Horde', 'horde',  'mobs'],
+    ['Elytra Fly','elytra', 'points'],
+  ].map(([label, key, unit]) =>
+    `<div class="best-score-row"><span class="best-label">${label}</span><span class="best-val">${getBestScore(key)} ${unit}</span></div>`
+  ).join('');
+}
+
 function renderBestScores() {
-  const el = document.getElementById('best-scores');
-  const r  = getBestScore('runner');
-  const h  = getBestScore('horde');
-  const t  = getBestScore('tnt');
-  el.innerHTML =
-    `<div class="best-score-row"><span class="best-label">Runner</span><span class="best-val">${r} blocks</span></div>` +
-    `<div class="best-score-row"><span class="best-label">Mob Horde</span><span class="best-val">${h} mobs</span></div>` +
-    `<div class="best-score-row"><span class="best-label">TNT Catch</span><span class="best-val">${t} diamonds</span></div>`;
+  document.getElementById('best-scores').innerHTML = bestScoresHTML();
+}
+
+function renderParentBestScores() {
+  const el = document.getElementById('parent-best-scores');
+  if (el) el.innerHTML = bestScoresHTML();
 }
 
 // ============================================================
@@ -501,6 +511,7 @@ document.addEventListener('keydown', e => {
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   renderHistory();
+  renderParentBestScores();
   updateStartBtn();
   if (getAllWordLists().length > 0) collapseNewList();
 
@@ -530,20 +541,28 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function launchBonus(gameKey, gameModule) {
+    document.getElementById('bonus-recap').classList.add('hidden');
+    document.getElementById('bonus-home-btn').classList.add('hidden');
     showScreen('bonus-screen');
     gameModule.startGame((finalScore) => {
-      const prev = getBestScore(gameKey);
-      if (finalScore > prev) {
-        setBestScore(gameKey, finalScore);
-        document.getElementById('bonus-home-btn').dataset.newBest = '1';
-      }
+      const prev   = getBestScore(gameKey);
+      const isNew  = finalScore > prev;
+      if (isNew) setBestScore(gameKey, finalScore);
+      const unit   = GAME_UNITS[gameKey];
+      const recap  = document.getElementById('bonus-recap');
+      recap.innerHTML =
+        `<p class="recap-score">${finalScore} ${unit}</p>` +
+        (isNew
+          ? `<p class="recap-new-best">NEW BEST!</p>`
+          : `<p class="recap-prev">Best: ${prev} ${unit}</p>`);
+      recap.classList.remove('hidden');
       document.getElementById('bonus-home-btn').classList.remove('hidden');
     });
   }
 
-  document.getElementById('bonus-runner-btn').addEventListener('click', () => launchBonus('runner', bonus));
-  document.getElementById('bonus-horde-btn').addEventListener('click',  () => launchBonus('horde', bonusHorde));
-  document.getElementById('bonus-tnt-btn').addEventListener('click',    () => launchBonus('tnt',   bonusTnt));
+  document.getElementById('bonus-runner-btn').addEventListener('click',  () => launchBonus('runner', bonus));
+  document.getElementById('bonus-horde-btn').addEventListener('click',   () => launchBonus('horde',  bonusHorde));
+  document.getElementById('bonus-elytra-btn').addEventListener('click',  () => launchBonus('elytra', bonusElytra));
 
   const bonusHomeBtn = document.getElementById('bonus-home-btn');
   function onBonusHome() {
@@ -552,7 +571,8 @@ document.addEventListener('DOMContentLoaded', () => {
     bonusHomeBtn.classList.add('hidden');
     bonus.stopGame();
     bonusHorde.stopGame();
-    bonusTnt.stopGame();
+    bonusElytra.stopGame();
+    renderParentBestScores();
     showScreen(currentModule === 'reading' ? 'reading-screen' : 'parent-screen');
   }
   bonusHomeBtn.addEventListener('click',    onBonusHome);

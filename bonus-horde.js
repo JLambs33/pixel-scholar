@@ -298,6 +298,7 @@ const bonusHorde = (() => {
   }
 
   function drawHUD() {
+    ctx.save();
     ctx.textBaseline = 'top';
     ctx.textAlign    = 'left';
     ctx.font = '10px "Press Start 2P", monospace';
@@ -348,6 +349,7 @@ const bonusHorde = (() => {
       ctx.textAlign    = 'left';
       ctx.textBaseline = 'top';
     }
+    ctx.restore();
   }
 
   function render() {

@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="version-badge">v0.2.0</div>
+  <div id="version-badge">v0.2.1</div>
   <button id="home-btn" class="home-btn hidden">&#8962; Home</button>
 
   <!-- ===================== HOME SCREEN ===================== -->
@@ -79,6 +79,11 @@
       <button id="start-btn" class="mc-button mc-button--green" disabled>
         &#9658; Start Game!
       </button>
+    </div>
+
+    <div class="panel" id="bonus-scores-panel">
+      <h2 class="panel-title">&#127942; Bonus Best Scores</h2>
+      <div id="parent-best-scores" class="best-scores"></div>
     </div>
 
     <div class="panel" id="history-panel">
@@ -209,7 +214,7 @@
       <div class="bonus-picker-buttons">
         <button id="bonus-runner-btn" class="mc-button mc-button--green bonus-pick-btn">&#127939; Runner</button>
         <button id="bonus-horde-btn" class="mc-button mc-button--green bonus-pick-btn">&#127991; Mob Horde</button>
-        <button id="bonus-tnt-btn"   class="mc-button mc-button--green bonus-pick-btn">&#128163; TNT Catch</button>
+        <button id="bonus-elytra-btn" class="mc-button mc-button--green bonus-pick-btn">&#9992; Elytra Fly</button>
       </div>
       <div id="best-scores" class="best-scores"></div>
     </div>
@@ -224,7 +229,8 @@
   <div id="bonus-screen" class="screen hidden">
     <p class="bonus-title">&#127918; BONUS ROUND!</p>
     <canvas id="bonus-canvas" class="bonus-canvas"></canvas>
-    <button id="bonus-home-btn" class="mc-button hidden">&#8592; Back to Home</button>
+    <div id="bonus-recap" class="bonus-recap hidden"></div>
+    <button id="bonus-home-btn" class="mc-button hidden">&#8592; Back to Words</button>
   </div>
 
   <div id="word-feedback" class="word-feedback hidden"></div>
@@ -239,7 +245,7 @@
   <script src="rewards.js"></script>
   <script src="bonus.js"></script>
   <script src="bonus-horde.js"></script>
-  <script src="bonus-tnt.js"></script>
+  <script src="bonus-elytra.js"></script>
   <script src="mobs.js"></script>
   <script src="reading-data.js"></script>
   <script src="reading.js"></script>
