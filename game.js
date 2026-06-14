@@ -437,23 +437,45 @@ function hideFeedback() {
 // ============================================================
 function endSession() {
   awaitingInput = false;
-  const mobIndex = getMobIndex();
-  incrementMobIndex();
-  const missed   = gs.wrongWords;
-  const perfect  = missed.length === 0;
+  const missed  = gs.wrongWords;
+  const perfect = missed.length === 0;
 
   document.getElementById('champion-title').textContent    = perfect ? 'YOU DID IT!' : 'NICE TRY!';
   document.getElementById('champion-subtitle').textContent = perfect ? 'Spelling Champion!' : 'Keep Practicing!';
   document.getElementById('champion-score').innerHTML =
     `${gs.correctCount} out of ${gs.words.length} words correct!` +
     (missed.length
-      ? `<br><br>Practice these:<br>${missed.map(w => w.toUpperCase()).join(', ')}`
-      : '<br><br>Perfect score! BONUS ROUND unlocked!');
-  document.getElementById('bonus-btn').classList.toggle('hidden', !perfect);
+      ? `<br><br>Spell all correctly to unlock a BONUS GAME!<br><br>Practice these:<br>${missed.map(w => w.toUpperCase()).join(', ')}`
+      : '');
+
   document.getElementById('play-again-btn').classList.toggle('hidden', perfect);
+  document.getElementById('bonus-picker').classList.toggle('hidden', !perfect);
+
+  if (perfect) renderBestScores();
+
   ambientMobs.stop();
-  rewards.revealMob(mobIndex);
   showScreen('champion-screen');
+}
+
+const GAME_UNITS = { runner: 'blocks', horde: 'mobs', elytra: 'points' };
+
+function bestScoresHTML() {
+  return [
+    ['Runner',    'runner', 'blocks'],
+    ['Mob Horde', 'horde',  'mobs'],
+    ['Elytra Fly','elytra', 'points'],
+  ].map(([label, key, unit]) =>
+    `<div class="best-score-row"><span class="best-label">${label}</span><span class="best-val">${getBestScore(key)} ${unit}</span></div>`
+  ).join('');
+}
+
+function renderBestScores() {
+  document.getElementById('best-scores').innerHTML = bestScoresHTML();
+}
+
+function renderParentBestScores() {
+  const el = document.getElementById('parent-best-scores');
+  if (el) el.innerHTML = bestScoresHTML();
 }
 
 // ============================================================
@@ -489,6 +511,7 @@ document.addEventListener('keydown', e => {
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   renderHistory();
+  renderParentBestScores();
   updateStartBtn();
   if (getAllWordLists().length > 0) collapseNewList();
 
@@ -517,17 +540,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.getElementById('bonus-btn').addEventListener('click', () => {
+  function launchBonus(gameKey, gameModule) {
+    document.getElementById('bonus-recap').classList.add('hidden');
+    document.getElementById('bonus-home-btn').classList.add('hidden');
     showScreen('bonus-screen');
-    bonus.startGame(() => {
+    gameModule.startGame((finalScore) => {
+      const prev   = getBestScore(gameKey);
+      const isNew  = finalScore > prev;
+      if (isNew) setBestScore(gameKey, finalScore);
+      const unit   = GAME_UNITS[gameKey];
+      const recap  = document.getElementById('bonus-recap');
+      recap.innerHTML =
+        `<p class="recap-score">${finalScore} ${unit}</p>` +
+        (isNew
+          ? `<p class="recap-new-best">NEW BEST!</p>`
+          : `<p class="recap-prev">Best: ${prev} ${unit}</p>`);
+      recap.classList.remove('hidden');
       document.getElementById('bonus-home-btn').classList.remove('hidden');
     });
-  });
+  }
+
+  document.getElementById('bonus-runner-btn').addEventListener('click',  () => launchBonus('runner', bonus));
+  document.getElementById('bonus-horde-btn').addEventListener('click',   () => launchBonus('horde',  bonusHorde));
+  document.getElementById('bonus-elytra-btn').addEventListener('click',  () => launchBonus('elytra', bonusElytra));
 
   const bonusHomeBtn = document.getElementById('bonus-home-btn');
   function onBonusHome() {
+    const isNewBest = bonusHomeBtn.dataset.newBest === '1';
+    bonusHomeBtn.dataset.newBest = '';
     bonusHomeBtn.classList.add('hidden');
     bonus.stopGame();
+    bonusHorde.stopGame();
+    bonusElytra.stopGame();
+    renderParentBestScores();
     showScreen(currentModule === 'reading' ? 'reading-screen' : 'parent-screen');
   }
   bonusHomeBtn.addEventListener('click',    onBonusHome);

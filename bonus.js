@@ -309,7 +309,7 @@ const bonus = (() => {
     if (!dead) {
       rafId = requestAnimationFrame(loop);
     } else {
-      if (onDone) { const cb = onDone; onDone = null; cb(); }
+      if (onDone) { const cb = onDone; onDone = null; cb(Math.floor(distance / 10)); }
     }
   }
 

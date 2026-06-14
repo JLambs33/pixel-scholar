@@ -1,5 +1,4 @@
 const DB_LISTS_KEY = 'spellingQuest_wordLists';
-const DB_MOB_KEY   = 'spellingQuest_mobIndex';
 
 function _loadLists() {
   try {
@@ -85,16 +84,12 @@ function deletePassageSet(id) {
   localStorage.setItem(DB_PASSAGES_KEY, JSON.stringify(remaining));
 }
 
-// ── Mob cycling ───────────────────────────────────────────────
+// ── Bonus game personal bests ─────────────────────────────────
 
-// Returns the current mob index (0–5).
-function getMobIndex() {
-  return parseInt(localStorage.getItem(DB_MOB_KEY) || '0', 10);
+function getBestScore(game) {
+  return parseInt(localStorage.getItem('ps_best_' + game) || '0', 10);
 }
 
-// Advances mob index and wraps at 6. Returns the NEW index.
-function incrementMobIndex() {
-  const next = (getMobIndex() + 1) % 6;
-  localStorage.setItem(DB_MOB_KEY, String(next));
-  return next;
+function setBestScore(game, score) {
+  localStorage.setItem('ps_best_' + game, String(score));
 }
