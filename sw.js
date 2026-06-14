@@ -1,4 +1,4 @@
-const CACHE = 'pixelscholar-v0.1.28';
+const CACHE = 'pixelscholar-v0.2.1';
 
 const ASSETS = [
   './',
@@ -8,6 +8,8 @@ const ASSETS = [
   './speech.js',
   './rewards.js',
   './bonus.js',
+  './bonus-horde.js',
+  './bonus-elytra.js',
   './game.js',
   './reading-data.js',
   './reading.js',
