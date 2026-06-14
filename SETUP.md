@@ -30,7 +30,7 @@ After the first visit the service worker caches everything. The game works with 
 Run a local server to test changes before pushing:
 
 ```
-python serve.py
+uv run serve.py
 ```
 
 Then open `http://localhost:8080` in Chrome. Stop with `Ctrl+C`.

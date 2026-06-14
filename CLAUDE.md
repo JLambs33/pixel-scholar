@@ -199,7 +199,7 @@ chore/*     ← staging → main promotions and housekeeping
    - Feature: `git checkout -b feature/ps-N-short-description`
    - Bug fix: `git checkout -b bugfix/ps-N-short-description`
 3. Do the work, commit with the story number in the message (see below)
-4. Notify the user to test locally via `python serve.py`
+4. Notify the user to test locally via `uv run serve.py`
 5. On approval, open a PR from the feature/bugfix branch into `staging`
 
 ### Promoting staging → main
@@ -238,7 +238,7 @@ Example: `ps-4: add difficulty toggle persistence`
 ### Staging preview URL
 
 GitHub Pages free tier only publishes one branch (currently `main`). For staging:
-- Test locally with `python serve.py` before opening the staging PR
+- Test locally with `uv run serve.py` before opening the staging PR
 - If a hosted staging URL becomes useful later, Netlify or Cloudflare Pages support free branch-preview deployments
 
 ## Planned future work
