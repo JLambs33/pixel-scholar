@@ -1326,12 +1326,46 @@ html, body {
 }
 
 .math-lesson-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 10px 14px;
   background: rgba(0, 0, 0, 0.4);
   border: 3px solid var(--mc-stone-dark);
   cursor: pointer;
   transition: filter 80ms;
   user-select: none;
+}
+
+.math-topic-chip {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-size: 20px;
+  border: 3px solid #000;
+  text-shadow: var(--shadow-text);
+}
+
+.math-topic-chip--add {
+  color: #fff;
+  background: var(--mc-green);
+  border-top-color:    var(--mc-green-light);
+  border-left-color:   var(--mc-green-light);
+  border-right-color:  var(--mc-green-dark);
+  border-bottom-color: var(--mc-green-dark);
+}
+
+.math-topic-chip--subtract {
+  color: #000;
+  background: var(--mc-gold);
+  border-top-color:    #FFD37F;
+  border-left-color:   #FFD37F;
+  border-right-color:  #B87800;
+  border-bottom-color: #B87800;
 }
 
 .math-lesson-item:hover {

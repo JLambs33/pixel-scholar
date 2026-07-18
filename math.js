@@ -38,9 +38,11 @@ const mathGame = (() => {
 
     container.innerHTML = lessons.map(l => {
       const isSelected = selectedLesson && selectedLesson.id === l.id;
+      const sym = l.topic === 'subtract' ? '&minus;' : '+';
       return `
         <div class="math-lesson-item${isSelected ? ' math-lesson-item--selected' : ''}"
              data-id="${escHtml(l.id)}">
+          <span class="math-topic-chip math-topic-chip--${l.topic}">${sym}</span>
           <div class="math-lesson-info">
             <span class="math-lesson-title">${escHtml(l.title)}</span>
             <span class="math-lesson-blurb">${escHtml(l.blurb)}</span>
