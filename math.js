@@ -38,7 +38,11 @@ const mathGame = (() => {
 
     container.innerHTML = lessons.map(l => {
       const isSelected = selectedLesson && selectedLesson.id === l.id;
-      const sym = l.topic === 'subtract' ? '&minus;' : '+';
+      const sym = l.topic === 'subtract' ? '&minus;'
+                : l.topic === 'time'     ? '&#128336;'
+                : l.topic === 'data'     ? '&#128202;'
+                : l.topic === 'order'    ? '&#8597;'
+                : '+';
       return `
         <div class="math-lesson-item${isSelected ? ' math-lesson-item--selected' : ''}"
              data-id="${escHtml(l.id)}">
@@ -114,7 +118,59 @@ const mathGame = (() => {
     if (!visual) return '';
     if (visual.type === 'ten-frame')   return tenFrameHTML(visual.values);
     if (visual.type === 'number-path') return numberPathHTML(visual.values);
+    if (visual.type === 'clock')       return clockSVG(visual.values[0], visual.values[1]);
+    if (visual.type === 'bar-chart')   return barChartHTML(visual.values);
     return '';
+  }
+
+  // values: [{label, value}]. Vertical bars read against a 0..max y-axis
+  // (no numbers on the bars, so "how many" requires reading the chart).
+  // Bars sit on the baseline; gridlines + axis numbers align at each unit,
+  // and each bar's top lands exactly on a gridline.
+  function barChartHTML(data) {
+    const UNIT = 26;
+    const max = Math.max(...data.map(d => d.value), 1);
+    const H = max * UNIT;
+    let ticks = '', grid = '';
+    for (let v = 0; v <= max; v++) {
+      ticks += `<span class="bar-tick" style="bottom:${v * UNIT}px">${v}</span>`;
+      if (v > 0) grid += `<div class="grid-line" style="bottom:${v * UNIT}px"></div>`;
+    }
+    const bars = data.map(d =>
+      `<div class="bar-col"><div class="bar" style="height:${d.value * UNIT}px"></div></div>`).join('');
+    const labels = data.map(d => `<span class="bar-label">${escHtml(d.label)}</span>`).join('');
+    return `<div class="bar-chart">
+      <div class="bar-axis" style="height:${H}px">${ticks}</div>
+      <div class="bar-body">
+        <div class="bar-plot" style="height:${H}px">${grid}<div class="bar-cols">${bars}</div></div>
+        <div class="bar-labels">${labels}</div>
+      </div>
+    </div>`;
+  }
+
+  // Analog clock face with hour + minute hands (values: [hour, minute]).
+  function clockSVG(hour, minute) {
+    const cx = 90, cy = 90, r = 82;
+    let marks = '';
+    for (let n = 1; n <= 12; n++) {
+      const ang = (n * 30 - 90) * Math.PI / 180;
+      const nx = cx + Math.cos(ang) * (r - 16);
+      const ny = cy + Math.sin(ang) * (r - 16);
+      marks += `<text x="${nx.toFixed(1)}" y="${(ny + 6).toFixed(1)}" class="clock-num" text-anchor="middle">${n}</text>`;
+    }
+    const hourAng = ((hour % 12) + minute / 60) * 30 - 90;
+    const minAng  = minute * 6 - 90;
+    const hx = cx + Math.cos(hourAng * Math.PI / 180) * (r * 0.48);
+    const hy = cy + Math.sin(hourAng * Math.PI / 180) * (r * 0.48);
+    const mx = cx + Math.cos(minAng * Math.PI / 180) * (r * 0.72);
+    const my = cy + Math.sin(minAng * Math.PI / 180) * (r * 0.72);
+    return `<svg viewBox="0 0 180 180" class="clock-svg" width="180" height="180">
+      <circle cx="${cx}" cy="${cy}" r="${r}" class="clock-face"/>
+      ${marks}
+      <line x1="${cx}" y1="${cy}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" class="clock-hour"/>
+      <line x1="${cx}" y1="${cy}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" class="clock-minute"/>
+      <circle cx="${cx}" cy="${cy}" r="5" class="clock-pin"/>
+    </svg>`;
   }
 
   // values: [a, b] (two addends, two colors) or [n] (single amount).
@@ -182,42 +238,110 @@ const mathGame = (() => {
     }).join(' ');
   }
 
+  function renderChoices(choices) {
+    document.getElementById('math-choices').innerHTML = choices.map(c =>
+      `<button class="math-choice" data-value="${escHtml(String(c))}">${escHtml(String(c))}</button>`
+    ).join('');
+  }
+
   function renderProblem() {
     const p = ms.problems[ms.problemIndex];
     if (!p) { endSession(); return; }
     inputLocked = false;
     clearAnswer();
 
-    const story = document.getElementById('math-problem-story');
-    if (p.story) {
+    const mode    = p.input || 'pad';
+    const usesPad = mode === 'pad';
+    const isWord  = usesPad && !!p.story;
+    const prompt  = document.getElementById('math-problem-prompt');
+    const visual  = document.getElementById('math-problem-visual');
+
+    // Toggle the input widgets and story panel for this problem.
+    document.getElementById('math-answer-slots').classList.toggle('hidden', !usesPad);
+    document.getElementById('math-number-pad').classList.toggle('hidden', !usesPad);
+    document.getElementById('math-choices').classList.toggle('hidden', mode !== 'choice');
+    document.getElementById('math-order').classList.toggle('hidden', mode !== 'order');
+    document.getElementById('math-problem-story').classList.toggle('hidden', !isWord);
+
+    if (isWord) {
       document.getElementById('math-story-tokens').innerHTML = storyTokensHTML(p.story);
-      story.classList.remove('hidden');
-      document.getElementById('math-problem-prompt').textContent = '';
-      document.getElementById('math-problem-visual').innerHTML = '';
+      prompt.textContent = '';
+      prompt.classList.remove('math-problem-prompt--question');
+      visual.innerHTML = '';
+      return;
+    }
+
+    visual.innerHTML = renderVisual(p.visual);
+    if (p.question) {
+      prompt.textContent = p.question;
+      prompt.classList.add('math-problem-prompt--question');
     } else {
-      story.classList.add('hidden');
-      document.getElementById('math-problem-prompt').textContent = `${p.prompt} =`;
-      document.getElementById('math-problem-visual').innerHTML = renderVisual(p.visual);
+      prompt.textContent = `${p.prompt} =`;
+      prompt.classList.remove('math-problem-prompt--question');
+    }
+    if (mode === 'choice') renderChoices(p.choices);
+    else if (mode === 'order') renderOrder(p.numbers);
+  }
+
+  // ── order-numbers input (tap least → greatest) ────────────────
+  let orderPlaced = [];
+
+  function renderOrder(numbers) {
+    orderPlaced = [];
+    const slots = numbers.map((_, i) =>
+      (i ? '<span class="order-lt">&lt;</span>' : '') + '<div class="order-slot"></div>'
+    ).join('');
+    document.getElementById('math-order-seq').innerHTML = slots;
+    document.getElementById('math-order-tiles').innerHTML = numbers.map(n =>
+      `<button class="order-tile" data-num="${n}">${n}</button>`
+    ).join('');
+  }
+
+  function updateOrderSeq() {
+    document.querySelectorAll('#math-order-seq .order-slot').forEach((slot, i) => {
+      slot.textContent = i < orderPlaced.length ? orderPlaced[i] : '';
+      slot.classList.toggle('order-slot--filled', i < orderPlaced.length);
+    });
+  }
+
+  function onOrderTile(btn) {
+    if (inputLocked || btn.disabled) return;
+    orderPlaced.push(parseInt(btn.dataset.num, 10));
+    btn.disabled = true;
+    btn.classList.add('order-tile--placed');
+    updateOrderSeq();
+    const p = ms.problems[ms.problemIndex];
+    if (orderPlaced.length === p.numbers.length) {
+      const correct = orderPlaced.every((n, i) => n === p.answer[i]);
+      scoreProblem(correct, p.answer.join(' &lt; '), 'least→greatest: ' + p.answer.join(', '));
     }
   }
 
   function checkAnswer(value) {
     if (inputLocked) return;
     const p = ms.problems[ms.problemIndex];
-    inputLocked = true;
+    scoreProblem(value === p.answer, String(p.answer), problemLabel(p));
+  }
 
-    if (value === p.answer) {
+  // Shared scoring/feedback used by every input mode (pad, choice, order).
+  function scoreProblem(isCorrect, correctText, label) {
+    inputLocked = true;
+    if (isCorrect) {
       ms.correctCount++;
       ms.results.push('correct');
       rewards.triggerBlockBurst();
       showFeedback('correct', '&#10003; Correct!', advanceProblem);
     } else {
-      ms.wrongProblems.push(p.prompt);
+      ms.wrongProblems.push(label);
       ms.results.push('wrong');
-      showFeedback('wrong', `&#10007; It was ${p.answer}`, advanceProblem);
+      showFeedback('wrong', `&#10007; It was ${correctText}`, advanceProblem);
     }
-
     updateProgress();
+  }
+
+  // Short label for the champion-screen practice list.
+  function problemLabel(p) {
+    return p.prompt || p.question || p.story || String(p.answer);
   }
 
   function advanceProblem() {
@@ -294,6 +418,18 @@ const mathGame = (() => {
     document.getElementById('math-story-tokens').addEventListener('click', e => {
       const btn = e.target.closest('.word-token');
       if (btn && btn.dataset.word) speech.speak(btn.dataset.word);
+    });
+
+    // Multiple-choice answer tiles (time / comparison lessons)
+    document.getElementById('math-choices').addEventListener('click', e => {
+      const btn = e.target.closest('.math-choice');
+      if (btn && !inputLocked) checkAnswer(btn.dataset.value);
+    });
+
+    // Order-numbers tiles (tap least → greatest)
+    document.getElementById('math-order-tiles').addEventListener('click', e => {
+      const btn = e.target.closest('.order-tile');
+      if (btn) onOrderTile(btn);
     });
 
     // Keyboard support while the game screen is active
