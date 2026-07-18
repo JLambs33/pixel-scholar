@@ -12,6 +12,7 @@ const mathGame = (() => {
 
   // ── state ─────────────────────────────────────────────────────
   let selectedLesson = null;
+  let inputLocked = false;   // true while feedback is showing
 
   let ms = {
     lesson: null,
@@ -81,6 +82,7 @@ const mathGame = (() => {
   }
 
   function pressKey(key) {
+    if (inputLocked) return;
     if (key === 'back') {
       typedDigits.pop();
     } else if (key === 'ok') {
@@ -101,15 +103,99 @@ const mathGame = (() => {
     return typedDigits.length ? parseInt(typedDigits.join(''), 10) : null;
   }
 
-  // ── session flow (stubbed — see ps-cww) ───────────────────────
+  // ── session flow ──────────────────────────────────────────────
 
   function startSession() {
     if (!selectedLesson) return;
-    // Full session flow implemented in ps-cww.
+
+    ms = {
+      lesson: selectedLesson,
+      problems: buildProblemSet(selectedLesson),
+      problemIndex: 0,
+      correctCount: 0,
+      wrongProblems: [],
+      results: [],
+    };
+
+    currentModule = 'math';
+    onAnswerSubmit = checkAnswer;
+    document.getElementById('change-words-btn').innerHTML = '&#8592; Change Lesson';
+
+    showScreen('math-game-screen');
+    ambientMobs.start('math-mob-canvas');
+    updateProgress();
+    renderProblem();
+  }
+
+  function renderProblem() {
+    const p = ms.problems[ms.problemIndex];
+    if (!p) { endSession(); return; }
+    inputLocked = false;
+    clearAnswer();
+    document.getElementById('math-problem-prompt').textContent = `${p.prompt} =`;
+    // Concrete-model visuals (ten-frame / number path) are rendered by ps-17;
+    // the container stays empty until then and collapses via CSS.
+    document.getElementById('math-problem-visual').innerHTML = '';
+  }
+
+  function checkAnswer(value) {
+    if (inputLocked) return;
+    const p = ms.problems[ms.problemIndex];
+    inputLocked = true;
+
+    if (value === p.answer) {
+      ms.correctCount++;
+      ms.results.push('correct');
+      rewards.triggerBlockBurst();
+      showFeedback('correct', '&#10003; Correct!', advanceProblem);
+    } else {
+      ms.wrongProblems.push(p.prompt);
+      ms.results.push('wrong');
+      showFeedback('wrong', `&#10007; It was ${p.answer}`, advanceProblem);
+    }
+
+    updateProgress();
+  }
+
+  function advanceProblem() {
+    ms.problemIndex++;
+    if (ms.problemIndex >= ms.problems.length) {
+      endSession();
+    } else {
+      renderProblem();
+    }
+  }
+
+  function updateProgress() {
+    const row = document.getElementById('math-progress-row');
+    if (!row) return;
+    row.innerHTML = Array.from({ length: ms.problems.length }, (_, i) => {
+      if (i < ms.results.length) {
+        const r = ms.results[i];
+        return `<div class="progress-pip progress-pip--${r}">${r === 'correct' ? '&#10003;' : '&#10007;'}</div>`;
+      }
+      return `<div class="progress-pip progress-pip--pending"></div>`;
+    }).join('');
   }
 
   function endSession() {
-    // Champion-screen integration implemented in ps-cww.
+    onAnswerSubmit = null;
+    ambientMobs.stop();
+    const perfect = ms.wrongProblems.length === 0;
+
+    document.getElementById('champion-title').textContent    = perfect ? 'YOU DID IT!' : 'NICE TRY!';
+    document.getElementById('champion-subtitle').textContent = perfect ? 'Math Champion!' : 'Keep Practicing!';
+    document.getElementById('champion-score').innerHTML =
+      `${ms.correctCount} out of ${ms.problems.length} problems correct!` +
+      (ms.wrongProblems.length
+        ? `<br><br>Solve all correctly to unlock a BONUS GAME!<br><br>Practice these:<br>${ms.wrongProblems.map(escHtml).join(', ')}`
+        : '');
+
+    document.getElementById('play-again-btn').classList.toggle('hidden', perfect);
+    document.getElementById('bonus-picker').classList.toggle('hidden', !perfect);
+    if (perfect) renderBestScores();
+
+    showScreen('champion-screen');
   }
 
   // ── init ──────────────────────────────────────────────────────
@@ -124,6 +210,9 @@ const mathGame = (() => {
     document.getElementById('math-start-btn').addEventListener('click', startSession);
 
     document.getElementById('math-quit-btn').addEventListener('click', () => {
+      ambientMobs.stop();
+      onAnswerSubmit = null;
+      inputLocked = false;
       showScreen('math-screen');
     });
 
