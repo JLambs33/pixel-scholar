@@ -1369,6 +1369,15 @@ html, body {
   border-bottom-color: #B87800;
 }
 
+.math-topic-chip--time {
+  font-size: 16px;
+  background: var(--mc-sky);
+  border-top-color:    #B3E5FC;
+  border-left-color:   #B3E5FC;
+  border-right-color:  #4A90B8;
+  border-bottom-color: #4A90B8;
+}
+
 .math-lesson-item:hover {
   filter: brightness(1.2);
 }
@@ -1500,6 +1509,55 @@ html, body {
   border-color: var(--mc-gold);
   background: rgba(255, 170, 0, 0.2);
   color: var(--mc-gold);
+}
+
+/* Analog clock */
+.clock-svg { display: block; }
+.clock-face {
+  fill: #FFFDF0;
+  stroke: #000;
+  stroke-width: 4;
+}
+.clock-num {
+  font-family: var(--font-main);
+  font-size: 13px;
+  fill: #222;
+}
+.clock-hour   { stroke: #000;             stroke-width: 6; stroke-linecap: round; }
+.clock-minute { stroke: var(--mc-wrong);  stroke-width: 4; stroke-linecap: round; }
+.clock-pin    { fill: var(--mc-gold); stroke: #000; stroke-width: 2; }
+
+/* Multiple-choice answer tiles */
+.math-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.math-choice {
+  font-family: var(--font-main);
+  font-size: 20px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+  padding: 18px 0;
+  background: var(--mc-stone);
+  border: 3px solid #000;
+  border-top-color:    var(--mc-stone-light);
+  border-left-color:   var(--mc-stone-light);
+  border-right-color:  var(--mc-stone-dark);
+  border-bottom-color: var(--mc-stone-dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+.math-choice:hover  { filter: brightness(1.15); }
+.math-choice:active { filter: brightness(0.9); }
+
+.math-problem-prompt--question {
+  font-size: 18px;
+  letter-spacing: 1px;
 }
 
 .math-problem-prompt {

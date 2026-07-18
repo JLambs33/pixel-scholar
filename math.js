@@ -38,7 +38,9 @@ const mathGame = (() => {
 
     container.innerHTML = lessons.map(l => {
       const isSelected = selectedLesson && selectedLesson.id === l.id;
-      const sym = l.topic === 'subtract' ? '&minus;' : '+';
+      const sym = l.topic === 'subtract' ? '&minus;'
+                : l.topic === 'time'     ? '&#128336;'
+                : '+';
       return `
         <div class="math-lesson-item${isSelected ? ' math-lesson-item--selected' : ''}"
              data-id="${escHtml(l.id)}">
@@ -114,7 +116,33 @@ const mathGame = (() => {
     if (!visual) return '';
     if (visual.type === 'ten-frame')   return tenFrameHTML(visual.values);
     if (visual.type === 'number-path') return numberPathHTML(visual.values);
+    if (visual.type === 'clock')       return clockSVG(visual.values[0], visual.values[1]);
     return '';
+  }
+
+  // Analog clock face with hour + minute hands (values: [hour, minute]).
+  function clockSVG(hour, minute) {
+    const cx = 90, cy = 90, r = 82;
+    let marks = '';
+    for (let n = 1; n <= 12; n++) {
+      const ang = (n * 30 - 90) * Math.PI / 180;
+      const nx = cx + Math.cos(ang) * (r - 16);
+      const ny = cy + Math.sin(ang) * (r - 16);
+      marks += `<text x="${nx.toFixed(1)}" y="${(ny + 6).toFixed(1)}" class="clock-num" text-anchor="middle">${n}</text>`;
+    }
+    const hourAng = ((hour % 12) + minute / 60) * 30 - 90;
+    const minAng  = minute * 6 - 90;
+    const hx = cx + Math.cos(hourAng * Math.PI / 180) * (r * 0.48);
+    const hy = cy + Math.sin(hourAng * Math.PI / 180) * (r * 0.48);
+    const mx = cx + Math.cos(minAng * Math.PI / 180) * (r * 0.72);
+    const my = cy + Math.sin(minAng * Math.PI / 180) * (r * 0.72);
+    return `<svg viewBox="0 0 180 180" class="clock-svg" width="180" height="180">
+      <circle cx="${cx}" cy="${cy}" r="${r}" class="clock-face"/>
+      ${marks}
+      <line x1="${cx}" y1="${cy}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" class="clock-hour"/>
+      <line x1="${cx}" y1="${cy}" x2="${mx.toFixed(1)}" y2="${my.toFixed(1)}" class="clock-minute"/>
+      <circle cx="${cx}" cy="${cy}" r="5" class="clock-pin"/>
+    </svg>`;
   }
 
   // values: [a, b] (two addends, two colors) or [n] (single amount).
@@ -182,21 +210,42 @@ const mathGame = (() => {
     }).join(' ');
   }
 
+  function renderChoices(choices) {
+    document.getElementById('math-choices').innerHTML = choices.map(c =>
+      `<button class="math-choice" data-value="${escHtml(String(c))}">${escHtml(String(c))}</button>`
+    ).join('');
+  }
+
   function renderProblem() {
     const p = ms.problems[ms.problemIndex];
     if (!p) { endSession(); return; }
     inputLocked = false;
     clearAnswer();
 
-    const story = document.getElementById('math-problem-story');
-    if (p.story) {
-      document.getElementById('math-story-tokens').innerHTML = storyTokensHTML(p.story);
+    const mode    = p.input || 'pad';
+    const story   = document.getElementById('math-problem-story');
+    const prompt  = document.getElementById('math-problem-prompt');
+    const usesPad = mode === 'pad';
+
+    // Toggle the input widgets for this problem's mode.
+    document.getElementById('math-answer-slots').classList.toggle('hidden', !usesPad);
+    document.getElementById('math-number-pad').classList.toggle('hidden', !usesPad);
+    document.getElementById('math-choices').classList.toggle('hidden', mode !== 'choice');
+    prompt.classList.toggle('math-problem-prompt--question', !usesPad);
+
+    if (mode === 'choice') {
+      story.classList.add('hidden');
+      document.getElementById('math-problem-visual').innerHTML = renderVisual(p.visual);
+      prompt.textContent = p.question;
+      renderChoices(p.choices);
+    } else if (p.story) {
       story.classList.remove('hidden');
-      document.getElementById('math-problem-prompt').textContent = '';
+      document.getElementById('math-story-tokens').innerHTML = storyTokensHTML(p.story);
+      prompt.textContent = '';
       document.getElementById('math-problem-visual').innerHTML = '';
     } else {
       story.classList.add('hidden');
-      document.getElementById('math-problem-prompt').textContent = `${p.prompt} =`;
+      prompt.textContent = `${p.prompt} =`;
       document.getElementById('math-problem-visual').innerHTML = renderVisual(p.visual);
     }
   }
@@ -294,6 +343,12 @@ const mathGame = (() => {
     document.getElementById('math-story-tokens').addEventListener('click', e => {
       const btn = e.target.closest('.word-token');
       if (btn && btn.dataset.word) speech.speak(btn.dataset.word);
+    });
+
+    // Multiple-choice answer tiles (time / comparison lessons)
+    document.getElementById('math-choices').addEventListener('click', e => {
+      const btn = e.target.closest('.math-choice');
+      if (btn && !inputLocked) checkAnswer(btn.dataset.value);
     });
 
     // Keyboard support while the game screen is active

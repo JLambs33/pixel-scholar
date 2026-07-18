@@ -183,6 +183,33 @@ const MATH_LIBRARY = [
     },
   },
 
+  // ── Telling Time (M1-90) ──────────────────────────────────────
+  // Read an analog clock (o'clock / half-past) and pick the digital time.
+  {
+    id: 'telling-time',
+    grade: 'grade1',
+    topic: 'time',
+    title: 'What Time Is It?',
+    blurb: 'Read the clock',
+    count: 6,
+    generate() {
+      const hour = mathRandInt(1, 12);
+      const minute = Math.random() < 0.5 ? 0 : 30;
+      const answer = mathTimeStr(hour, minute);
+      const choices = new Set([answer]);
+      while (choices.size < 4) {
+        choices.add(mathTimeStr(mathRandInt(1, 12), Math.random() < 0.5 ? 0 : 30));
+      }
+      return {
+        input: 'choice',
+        question: 'What time is it?',
+        visual: { type: 'clock', values: [hour, minute] },
+        answer,
+        choices: mathShuffle([...choices]),
+      };
+    },
+  },
+
 ];
 
 // Minecraft flavor for word problems.
@@ -195,6 +222,14 @@ function mathPick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function mathShuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+function mathTimeStr(hour, minute) {
+  return `${hour}:${minute === 0 ? '00' : '30'}`;
+}
+
 // Build a fixed-length set of problems for a lesson, avoiding immediate repeats.
 function buildProblemSet(lesson) {
   const set = [];
@@ -203,7 +238,7 @@ function buildProblemSet(lesson) {
   while (set.length < lesson.count && guard < lesson.count * 30) {
     guard++;
     const p = lesson.generate();
-    const key = p.prompt || p.story;
+    const key = p.prompt || p.story || String(p.answer);
     if (seen.has(key)) continue;
     seen.add(key);
     set.push(p);
