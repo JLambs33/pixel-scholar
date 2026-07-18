@@ -116,7 +116,59 @@ const MATH_LIBRARY = [
     },
   },
 
+  // ── Add Story Problems (M1-115 flavor) ────────────────────────
+  // "There are 9 creepers. 5 more spawn. How many now?" — 9+n / 8+n.
+  {
+    id: 'add-word',
+    grade: 'grade1',
+    topic: 'add',
+    title: 'Add Story Problems',
+    blurb: 'Read and add the mobs',
+    count: 6,
+    generate() {
+      const a = Math.random() < 0.5 ? 9 : 8;
+      const b = mathRandInt(2, 9);
+      const mob = mathPick(MATH_MOBS);
+      return {
+        story: `There are ${a} ${mob}. Then ${b} more ${mob} spawn. How many ${mob} are there now?`,
+        answer: a + b,
+        visual: null,
+      };
+    },
+  },
+
+  // ── Subtract Story Problems (M1-15 flavor) ────────────────────
+  // "There are 15 pigs. 7 wander off. How many are left?" — make 10.
+  {
+    id: 'subtract-word',
+    grade: 'grade1',
+    topic: 'subtract',
+    title: 'Subtract Story Problems',
+    blurb: 'Read and take some away',
+    count: 6,
+    generate() {
+      const minuend = mathRandInt(11, 18);
+      const ones = minuend - 10;
+      const sub = mathRandInt(ones + 1, 9);
+      const mob = mathPick(MATH_MOBS);
+      const away = mathPick(MATH_AWAY);
+      return {
+        story: `There are ${minuend} ${mob}. Then ${sub} ${mob} ${away}. How many ${mob} are left?`,
+        answer: minuend - sub,
+        visual: null,
+      };
+    },
+  },
+
 ];
+
+// Minecraft flavor for word problems.
+const MATH_MOBS = ['creepers', 'pigs', 'cows', 'chickens', 'sheep', 'zombies', 'skeletons'];
+const MATH_AWAY = ['wander off', 'run away', 'despawn'];
+
+function mathPick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
 // Build a fixed-length set of problems for a lesson, avoiding immediate repeats.
 function buildProblemSet(lesson) {
@@ -126,8 +178,9 @@ function buildProblemSet(lesson) {
   while (set.length < lesson.count && guard < lesson.count * 30) {
     guard++;
     const p = lesson.generate();
-    if (seen.has(p.prompt)) continue;
-    seen.add(p.prompt);
+    const key = p.prompt || p.story;
+    if (seen.has(key)) continue;
+    seen.add(key);
     set.push(p);
   }
   return set;
