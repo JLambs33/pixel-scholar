@@ -2,12 +2,12 @@
 //
 // Source material: hand2mind Grade 1, Module 1 worksheets (see /images).
 // Unlike reading/spelling, math content is generated procedurally: each lesson
-// defines a generator that emits problem objects on demand, so a fresh set of
+// defines a generate() that emits problem objects on demand, so a fresh set of
 // problems appears every session.
 //
 // Lesson shape:
 //   {
-//     id:      'lesson-add-ten-adjust',   // stable unique id
+//     id:      'add-ten-adjust',          // stable unique id
 //     grade:   'grade1',                  // 'grade1' (more grades later)
 //     topic:   'add' | 'subtract',        // grouping / icon
 //     title:   'Use 10 and Adjust',       // shown on the lesson card
@@ -20,10 +20,115 @@
 //   {
 //     prompt: '9 + 3',        // display string (answer entered on number pad)
 //     answer: 12,             // integer, non-negative
-//     visual: null,           // optional: { type: 'ten-frame'|'number-path', ... }
+//     visual: null | {        // optional concrete model (rendered by ps-17)
+//       type: 'ten-frame' | 'number-path',
+//       values: [ ... ],      // interpretation depends on type
+//     },
 //   }
 //
-// Phase 1 (this file) covers the four pure-arithmetic lessons. Word problems,
-// telling time, data graphs, and ordering land in later phases.
+// Phase 1 covers the four pure-arithmetic lessons. Word problems, telling time,
+// data graphs, and ordering land in later phases.
 
-const MATH_LIBRARY = [];
+function mathRandInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const MATH_LIBRARY = [
+
+  // ── Use 10 and Adjust to Add (M1-115 / M1-109) ────────────────
+  // Add 9 or 8 to a single digit — "make a ten, then adjust."
+  {
+    id: 'add-ten-adjust',
+    grade: 'grade1',
+    topic: 'add',
+    title: 'Use 10 and Adjust',
+    blurb: 'Add 9 and 8 the easy way',
+    count: 8,
+    generate() {
+      const a = Math.random() < 0.5 ? 9 : 8;
+      const b = mathRandInt(2, 9);
+      return {
+        prompt: `${a} + ${b}`,
+        answer: a + b,
+        visual: { type: 'ten-frame', values: [a, b] },
+      };
+    },
+  },
+
+  // ── Use Doubles for 3 Addends (M1-109) ────────────────────────
+  // a + a + b — spot the double, then add the extra.
+  {
+    id: 'doubles-3-addends',
+    grade: 'grade1',
+    topic: 'add',
+    title: 'Doubles + 1 More',
+    blurb: 'Add three numbers using doubles',
+    count: 8,
+    generate() {
+      const a = mathRandInt(1, 6);
+      const b = mathRandInt(1, 6);
+      return {
+        prompt: `${a} + ${a} + ${b}`,
+        answer: a + a + b,
+        visual: null,
+      };
+    },
+  },
+
+  // ── Make 10 to Subtract (M1-15) ───────────────────────────────
+  // Teen minus a number that crosses the ten, e.g. 15 - 7.
+  {
+    id: 'make-ten-subtract',
+    grade: 'grade1',
+    topic: 'subtract',
+    title: 'Make 10 to Subtract',
+    blurb: 'Break the ten to take away',
+    count: 8,
+    generate() {
+      const minuend = mathRandInt(11, 18);
+      const ones = minuend - 10;                 // 1..8
+      const sub = mathRandInt(ones + 1, 9);      // crosses 10 → answer 1..9
+      return {
+        prompt: `${minuend} - ${sub}`,
+        answer: minuend - sub,
+        visual: { type: 'ten-frame', values: [minuend] },
+      };
+    },
+  },
+
+  // ── Counting Back (M1-123) ────────────────────────────────────
+  // Subtract a small hop from a teen number on the number path.
+  {
+    id: 'counting-back',
+    grade: 'grade1',
+    topic: 'subtract',
+    title: 'Counting Back',
+    blurb: 'Hop back on the number path',
+    count: 8,
+    generate() {
+      const minuend = mathRandInt(11, 20);
+      const sub = mathRandInt(2, 5);
+      return {
+        prompt: `${minuend} - ${sub}`,
+        answer: minuend - sub,
+        visual: { type: 'number-path', values: [minuend, sub] },
+      };
+    },
+  },
+
+];
+
+// Build a fixed-length set of problems for a lesson, avoiding immediate repeats.
+function buildProblemSet(lesson) {
+  const set = [];
+  const seen = new Set();
+  let guard = 0;
+  while (set.length < lesson.count && guard < lesson.count * 30) {
+    guard++;
+    const p = lesson.generate();
+    if (seen.has(p.prompt)) continue;
+    seen.add(p.prompt);
+    set.push(p);
+  }
+  return set;
+}

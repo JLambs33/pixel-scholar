@@ -1315,3 +1315,166 @@ html, body {
   border: 1px solid var(--mc-stone-dark);
   letter-spacing: 1px;
 }
+
+/* ============================================================
+   Math module — lesson picker
+   ============================================================ */
+.math-lesson-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.math-lesson-item {
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 3px solid var(--mc-stone-dark);
+  cursor: pointer;
+  transition: filter 80ms;
+  user-select: none;
+}
+
+.math-lesson-item:hover {
+  filter: brightness(1.2);
+}
+
+.math-lesson-item--selected {
+  border-color: var(--mc-gold);
+  background: rgba(255, 170, 0, 0.12);
+}
+
+.math-lesson-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.math-lesson-title {
+  font-size: 11px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+}
+
+.math-lesson-blurb {
+  font-size: 9px;
+  color: var(--mc-stone-light);
+  text-shadow: var(--shadow-text);
+}
+
+/* ============================================================
+   Math module — game screen
+   ============================================================ */
+.math-problem-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.math-problem-visual:empty {
+  display: none;
+}
+
+.math-problem-prompt {
+  font-size: 34px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+  letter-spacing: 2px;
+  min-height: 40px;
+}
+
+.math-answer-slots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: 56px;
+}
+
+.answer-slot {
+  width: 48px;
+  height: 56px;
+  background: #000;
+  border: 3px solid #000;
+  border-top-color:    var(--mc-stone-dark);
+  border-left-color:   var(--mc-stone-dark);
+  border-right-color:  var(--mc-stone-light);
+  border-bottom-color: var(--mc-stone-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-size: 24px;
+  color: #fff;
+  text-shadow: var(--shadow-text);
+  transition: border-color 80ms;
+}
+
+.answer-slot--filled {
+  border-top-color:    var(--mc-green-light);
+  border-left-color:   var(--mc-green-light);
+  border-right-color:  var(--mc-green-dark);
+  border-bottom-color: var(--mc-green-dark);
+  color: var(--mc-xp);
+}
+
+.answer-slot--active {
+  border-color: var(--mc-gold);
+  animation: cursor-blink 900ms step-end infinite;
+}
+
+/* ============================================================
+   Math module — number pad
+   ============================================================ */
+.math-number-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.num-key {
+  font-family: var(--font-main);
+  font-size: 20px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+  padding: 16px 0;
+  background: var(--mc-stone);
+  border: 3px solid #000;
+  border-top-color:    var(--mc-stone-light);
+  border-left-color:   var(--mc-stone-light);
+  border-right-color:  var(--mc-stone-dark);
+  border-bottom-color: var(--mc-stone-dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+.num-key:hover {
+  filter: brightness(1.15);
+}
+
+.num-key:active {
+  filter: brightness(0.9);
+  border-top-color:    var(--mc-stone-dark);
+  border-left-color:   var(--mc-stone-dark);
+  border-right-color:  var(--mc-stone-light);
+  border-bottom-color: var(--mc-stone-light);
+}
+
+.num-key--action {
+  color: var(--mc-gold);
+}
+
+.num-key--ok {
+  font-size: 16px;
+  color: #fff;
+  background: var(--mc-green);
+  border-top-color:    var(--mc-green-light);
+  border-left-color:   var(--mc-green-light);
+  border-right-color:  var(--mc-green-dark);
+  border-bottom-color: var(--mc-green-dark);
+}

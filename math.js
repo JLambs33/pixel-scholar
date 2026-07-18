@@ -54,6 +54,53 @@ const mathGame = (() => {
     renderLessonList();
   }
 
+  // ── number-pad input ──────────────────────────────────────────
+  // Answers are typed on a 0-9 pixel keypad, mirroring the spelling
+  // letter-slot model. Max answer in Grade 1 is 18, so two digits.
+
+  let typedDigits = [];
+  const MAX_ANSWER_DIGITS = 2;
+  let onAnswerSubmit = null;   // wired by the session flow (ps-cww)
+
+  function mountNumberPad() {
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'back', '0', 'ok'];
+    document.getElementById('math-number-pad').innerHTML = keys.map(k => {
+      if (k === 'back') return '<button class="num-key num-key--action" data-key="back">&#9003;</button>';
+      if (k === 'ok')   return '<button class="num-key num-key--ok" data-key="ok">OK</button>';
+      return `<button class="num-key" data-key="${k}">${k}</button>`;
+    }).join('');
+    updateAnswerSlots();
+  }
+
+  function updateAnswerSlots() {
+    const slots = typedDigits.map(d => `<div class="answer-slot answer-slot--filled">${d}</div>`);
+    if (typedDigits.length < MAX_ANSWER_DIGITS) {
+      slots.push('<div class="answer-slot answer-slot--active"></div>');
+    }
+    document.getElementById('math-answer-slots').innerHTML = slots.join('');
+  }
+
+  function pressKey(key) {
+    if (key === 'back') {
+      typedDigits.pop();
+    } else if (key === 'ok') {
+      if (typedDigits.length && onAnswerSubmit) onAnswerSubmit(getTypedAnswer());
+      return;
+    } else if (typedDigits.length < MAX_ANSWER_DIGITS) {
+      typedDigits.push(key);
+    }
+    updateAnswerSlots();
+  }
+
+  function clearAnswer() {
+    typedDigits = [];
+    updateAnswerSlots();
+  }
+
+  function getTypedAnswer() {
+    return typedDigits.length ? parseInt(typedDigits.join(''), 10) : null;
+  }
+
   // ── session flow (stubbed — see ps-cww) ───────────────────────
 
   function startSession() {
@@ -78,6 +125,21 @@ const mathGame = (() => {
 
     document.getElementById('math-quit-btn').addEventListener('click', () => {
       showScreen('math-screen');
+    });
+
+    // Number pad — static layout, event delegation for taps
+    mountNumberPad();
+    document.getElementById('math-number-pad').addEventListener('click', e => {
+      const btn = e.target.closest('.num-key');
+      if (btn) pressKey(btn.dataset.key);
+    });
+
+    // Keyboard support while the game screen is active
+    document.addEventListener('keydown', e => {
+      if (document.getElementById('math-game-screen').classList.contains('hidden')) return;
+      if (/^[0-9]$/.test(e.key))      pressKey(e.key);
+      else if (e.key === 'Backspace') { e.preventDefault(); pressKey('back'); }
+      else if (e.key === 'Enter')     pressKey('ok');
     });
 
     renderLessonList();
