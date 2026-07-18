@@ -30,11 +30,10 @@
         <span class="module-icon">📖</span>
         <span class="module-name">Reading</span>
       </button>
-      <div class="module-card module-card--disabled">
+      <button class="module-card" id="module-math">
         <span class="module-icon">123</span>
         <span class="module-name">Math</span>
-        <span class="module-coming-soon">Coming Soon</span>
-      </div>
+      </button>
     </div>
   </div>
 
@@ -180,6 +179,50 @@
     </div>
   </div>
 
+  <!-- ===================== MATH SCREEN ===================== -->
+  <div id="math-screen" class="screen hidden">
+    <div class="title-block">
+      <h1 class="game-title">Math<br>Quest</h1>
+      <p class="game-subtitle">Minecraft Edition</p>
+    </div>
+
+    <div class="panel">
+      <label class="mc-label">Grade Level</label>
+      <div class="mc-select-wrap">
+        <select id="math-grade-select" class="mc-select" disabled>
+          <option value="grade1" selected>&#129518; Grade 1</option>
+        </select>
+        <span class="mc-select-arrow">&#9660;</span>
+      </div>
+
+      <label class="mc-label">Choose a Lesson</label>
+      <div id="math-lesson-list" class="math-lesson-list"></div>
+
+      <button id="math-start-btn" class="mc-button mc-button--green" disabled>
+        &#9658; Start Math!
+      </button>
+    </div>
+  </div>
+
+  <!-- ================== MATH GAME SCREEN =================== -->
+  <div id="math-game-screen" class="screen hidden">
+    <canvas id="math-mob-canvas"></canvas>
+    <div class="game-header">
+      <div class="progress-wrap">
+        <span class="progress-label">Problems:</span>
+        <div id="math-progress-row" class="progress-row"></div>
+      </div>
+      <button id="math-quit-btn" class="mc-button mc-button--small">&#10005; Quit</button>
+    </div>
+
+    <div id="math-problem-area" class="math-problem-area">
+      <div id="math-problem-visual" class="math-problem-visual"></div>
+      <div id="math-problem-prompt" class="math-problem-prompt"></div>
+      <div id="math-answer-slots" class="math-answer-slots"></div>
+      <div id="math-number-pad" class="math-number-pad"></div>
+    </div>
+  </div>
+
   <!-- ===================== GAME SCREEN ===================== -->
   <div id="game-screen" class="screen hidden">
     <canvas id="mob-canvas"></canvas>
@@ -249,6 +292,8 @@
   <script src="mobs.js"></script>
   <script src="reading-data.js"></script>
   <script src="reading.js"></script>
+  <script src="math-data.js"></script>
+  <script src="math.js"></script>
   <script src="game.js"></script>
   <script>
     // Set today's date as the default label
