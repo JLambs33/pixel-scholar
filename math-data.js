@@ -160,11 +160,36 @@ const MATH_LIBRARY = [
     },
   },
 
+  // ── Comparison Story Problems (M1-45 flavor) ──────────────────
+  // "Steve has 12 diamonds. Alex has 5. How many more does Steve have?"
+  {
+    id: 'compare-word',
+    grade: 'grade1',
+    topic: 'subtract',
+    title: 'Compare — More or Fewer',
+    blurb: 'Read and find the difference',
+    count: 6,
+    generate() {
+      const big = mathRandInt(6, 18);
+      const small = mathRandInt(1, big - 1);
+      const item = mathPick(MATH_ITEMS);
+      const names = [...MATH_NAMES];
+      const n1 = names.splice(Math.floor(Math.random() * names.length), 1)[0];
+      const n2 = names.splice(Math.floor(Math.random() * names.length), 1)[0];
+      const story = Math.random() < 0.5
+        ? `${n1} has ${big} ${item}. ${n2} has ${small} ${item}. How many more ${item} does ${n1} have?`
+        : `${n1} has ${big} ${item}. ${n2} has ${small} ${item}. How many fewer ${item} does ${n2} have?`;
+      return { story, answer: big - small, visual: null };
+    },
+  },
+
 ];
 
 // Minecraft flavor for word problems.
-const MATH_MOBS = ['creepers', 'pigs', 'cows', 'chickens', 'sheep', 'zombies', 'skeletons'];
-const MATH_AWAY = ['wander off', 'run away', 'despawn'];
+const MATH_MOBS  = ['creepers', 'pigs', 'cows', 'chickens', 'sheep', 'zombies', 'skeletons'];
+const MATH_AWAY  = ['wander off', 'run away', 'despawn'];
+const MATH_ITEMS = ['diamonds', 'apples', 'torches', 'arrows', 'cookies', 'emeralds', 'carrots'];
+const MATH_NAMES = ['Steve', 'Alex', 'Zoe', 'Max'];
 
 function mathPick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
