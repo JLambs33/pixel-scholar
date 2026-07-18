@@ -416,7 +416,8 @@ html, body {
 }
 
 #mob-canvas,
-#reading-mob-canvas {
+#reading-mob-canvas,
+#math-mob-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1314,4 +1315,263 @@ html, body {
   padding: 3px 6px;
   border: 1px solid var(--mc-stone-dark);
   letter-spacing: 1px;
+}
+
+/* ============================================================
+   Math module — lesson picker
+   ============================================================ */
+.math-lesson-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.math-lesson-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 3px solid var(--mc-stone-dark);
+  cursor: pointer;
+  transition: filter 80ms;
+  user-select: none;
+}
+
+.math-topic-chip {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-size: 20px;
+  border: 3px solid #000;
+  text-shadow: var(--shadow-text);
+}
+
+.math-topic-chip--add {
+  color: #fff;
+  background: var(--mc-green);
+  border-top-color:    var(--mc-green-light);
+  border-left-color:   var(--mc-green-light);
+  border-right-color:  var(--mc-green-dark);
+  border-bottom-color: var(--mc-green-dark);
+}
+
+.math-topic-chip--subtract {
+  color: #000;
+  background: var(--mc-gold);
+  border-top-color:    #FFD37F;
+  border-left-color:   #FFD37F;
+  border-right-color:  #B87800;
+  border-bottom-color: #B87800;
+}
+
+.math-lesson-item:hover {
+  filter: brightness(1.2);
+}
+
+.math-lesson-item--selected {
+  border-color: var(--mc-gold);
+  background: rgba(255, 170, 0, 0.12);
+}
+
+.math-lesson-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.math-lesson-title {
+  font-size: 11px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+}
+
+.math-lesson-blurb {
+  font-size: 9px;
+  color: var(--mc-stone-light);
+  text-shadow: var(--shadow-text);
+}
+
+/* ============================================================
+   Math module — game screen
+   ============================================================ */
+.math-problem-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.math-problem-visual:empty {
+  display: none;
+}
+
+/* Ten-frame model */
+.ten-frames {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ten-frame {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  background: #000;
+  border: 3px solid var(--mc-stone-dark);
+  padding: 2px;
+}
+
+.tf-cell {
+  width: 26px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--mc-stone-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tf-dot {
+  width: 16px;
+  height: 16px;
+}
+
+.tf-dot--a { background: var(--mc-green-light); }
+.tf-dot--b { background: var(--mc-gold); }
+
+/* Number path model */
+.number-path {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+}
+
+.np-cell {
+  min-width: 34px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-size: 12px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--mc-stone-dark);
+}
+
+.np-cell--start {
+  border-color: var(--mc-gold);
+  background: rgba(255, 170, 0, 0.2);
+  color: var(--mc-gold);
+}
+
+.math-problem-prompt {
+  font-size: 34px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+  letter-spacing: 2px;
+  min-height: 40px;
+}
+
+.math-answer-slots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: 56px;
+}
+
+.answer-slot {
+  width: 48px;
+  height: 56px;
+  background: #000;
+  border: 3px solid #000;
+  border-top-color:    var(--mc-stone-dark);
+  border-left-color:   var(--mc-stone-dark);
+  border-right-color:  var(--mc-stone-light);
+  border-bottom-color: var(--mc-stone-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-size: 24px;
+  color: #fff;
+  text-shadow: var(--shadow-text);
+  transition: border-color 80ms;
+}
+
+.answer-slot--filled {
+  border-top-color:    var(--mc-green-light);
+  border-left-color:   var(--mc-green-light);
+  border-right-color:  var(--mc-green-dark);
+  border-bottom-color: var(--mc-green-dark);
+  color: var(--mc-xp);
+}
+
+.answer-slot--active {
+  border-color: var(--mc-gold);
+  animation: cursor-blink 900ms step-end infinite;
+}
+
+/* ============================================================
+   Math module — number pad
+   ============================================================ */
+.math-number-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.num-key {
+  font-family: var(--font-main);
+  font-size: 20px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+  padding: 16px 0;
+  background: var(--mc-stone);
+  border: 3px solid #000;
+  border-top-color:    var(--mc-stone-light);
+  border-left-color:   var(--mc-stone-light);
+  border-right-color:  var(--mc-stone-dark);
+  border-bottom-color: var(--mc-stone-dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+.num-key:hover {
+  filter: brightness(1.15);
+}
+
+.num-key:active {
+  filter: brightness(0.9);
+  border-top-color:    var(--mc-stone-dark);
+  border-left-color:   var(--mc-stone-dark);
+  border-right-color:  var(--mc-stone-light);
+  border-bottom-color: var(--mc-stone-light);
+}
+
+.num-key--action {
+  color: var(--mc-gold);
+}
+
+.num-key--ok {
+  font-size: 16px;
+  color: #fff;
+  background: var(--mc-green);
+  border-top-color:    var(--mc-green-light);
+  border-left-color:   var(--mc-green-light);
+  border-right-color:  var(--mc-green-dark);
+  border-bottom-color: var(--mc-green-dark);
 }
