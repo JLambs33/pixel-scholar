@@ -249,6 +249,29 @@ const MATH_LIBRARY = [
     },
   },
 
+  // ── Order Numbers: Least to Greatest (M1-37) ──────────────────
+  // Tap three distinct numbers in increasing order.
+  {
+    id: 'order-numbers',
+    grade: 'grade1',
+    topic: 'order',
+    title: 'Least to Greatest',
+    blurb: 'Tap in order, smallest first',
+    count: 6,
+    generate() {
+      const set = new Set();
+      while (set.size < 3) set.add(mathRandInt(1, 20));
+      const numbers = mathShuffle([...set]);
+      return {
+        input: 'order',
+        question: 'Tap from least to greatest',
+        numbers,
+        answer: [...numbers].sort((a, b) => a - b),
+        visual: null,
+      };
+    },
+  },
+
 ];
 
 // True when the relevant extreme (most/fewest) is a single unambiguous bar.

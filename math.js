@@ -41,6 +41,7 @@ const mathGame = (() => {
       const sym = l.topic === 'subtract' ? '&minus;'
                 : l.topic === 'time'     ? '&#128336;'
                 : l.topic === 'data'     ? '&#128202;'
+                : l.topic === 'order'    ? '&#8597;'
                 : '+';
       return `
         <div class="math-lesson-item${isSelected ? ' math-lesson-item--selected' : ''}"
@@ -252,6 +253,7 @@ const mathGame = (() => {
     document.getElementById('math-answer-slots').classList.toggle('hidden', !usesPad);
     document.getElementById('math-number-pad').classList.toggle('hidden', !usesPad);
     document.getElementById('math-choices').classList.toggle('hidden', mode !== 'choice');
+    document.getElementById('math-order').classList.toggle('hidden', mode !== 'order');
     document.getElementById('math-problem-story').classList.toggle('hidden', !isWord);
 
     if (isWord) {
@@ -271,25 +273,68 @@ const mathGame = (() => {
       prompt.classList.remove('math-problem-prompt--question');
     }
     if (mode === 'choice') renderChoices(p.choices);
+    else if (mode === 'order') renderOrder(p.numbers);
+  }
+
+  // ── order-numbers input (tap least → greatest) ────────────────
+  let orderPlaced = [];
+
+  function renderOrder(numbers) {
+    orderPlaced = [];
+    const slots = numbers.map((_, i) =>
+      (i ? '<span class="order-lt">&lt;</span>' : '') + '<div class="order-slot"></div>'
+    ).join('');
+    document.getElementById('math-order-seq').innerHTML = slots;
+    document.getElementById('math-order-tiles').innerHTML = numbers.map(n =>
+      `<button class="order-tile" data-num="${n}">${n}</button>`
+    ).join('');
+  }
+
+  function updateOrderSeq() {
+    document.querySelectorAll('#math-order-seq .order-slot').forEach((slot, i) => {
+      slot.textContent = i < orderPlaced.length ? orderPlaced[i] : '';
+      slot.classList.toggle('order-slot--filled', i < orderPlaced.length);
+    });
+  }
+
+  function onOrderTile(btn) {
+    if (inputLocked || btn.disabled) return;
+    orderPlaced.push(parseInt(btn.dataset.num, 10));
+    btn.disabled = true;
+    btn.classList.add('order-tile--placed');
+    updateOrderSeq();
+    const p = ms.problems[ms.problemIndex];
+    if (orderPlaced.length === p.numbers.length) {
+      const correct = orderPlaced.every((n, i) => n === p.answer[i]);
+      scoreProblem(correct, p.answer.join(' &lt; '), 'least→greatest: ' + p.answer.join(', '));
+    }
   }
 
   function checkAnswer(value) {
     if (inputLocked) return;
     const p = ms.problems[ms.problemIndex];
-    inputLocked = true;
+    scoreProblem(value === p.answer, String(p.answer), problemLabel(p));
+  }
 
-    if (value === p.answer) {
+  // Shared scoring/feedback used by every input mode (pad, choice, order).
+  function scoreProblem(isCorrect, correctText, label) {
+    inputLocked = true;
+    if (isCorrect) {
       ms.correctCount++;
       ms.results.push('correct');
       rewards.triggerBlockBurst();
       showFeedback('correct', '&#10003; Correct!', advanceProblem);
     } else {
-      ms.wrongProblems.push(p.prompt);
+      ms.wrongProblems.push(label);
       ms.results.push('wrong');
-      showFeedback('wrong', `&#10007; It was ${p.answer}`, advanceProblem);
+      showFeedback('wrong', `&#10007; It was ${correctText}`, advanceProblem);
     }
-
     updateProgress();
+  }
+
+  // Short label for the champion-screen practice list.
+  function problemLabel(p) {
+    return p.prompt || p.question || p.story || String(p.answer);
   }
 
   function advanceProblem() {
@@ -372,6 +417,12 @@ const mathGame = (() => {
     document.getElementById('math-choices').addEventListener('click', e => {
       const btn = e.target.closest('.math-choice');
       if (btn && !inputLocked) checkAnswer(btn.dataset.value);
+    });
+
+    // Order-numbers tiles (tap least → greatest)
+    document.getElementById('math-order-tiles').addEventListener('click', e => {
+      const btn = e.target.closest('.order-tile');
+      if (btn) onOrderTile(btn);
     });
 
     // Keyboard support while the game screen is active

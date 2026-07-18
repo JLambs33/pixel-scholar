@@ -1387,6 +1387,15 @@ html, body {
   border-bottom-color: #4D2C91;
 }
 
+.math-topic-chip--order {
+  color: #000;
+  background: #26A69A;
+  border-top-color:    #64D8CB;
+  border-left-color:   #64D8CB;
+  border-right-color:  #00766C;
+  border-bottom-color: #00766C;
+}
+
 .math-lesson-item:hover {
   filter: brightness(1.2);
 }
@@ -1625,6 +1634,80 @@ html, body {
 
 .math-choice:hover  { filter: brightness(1.15); }
 .math-choice:active { filter: brightness(0.9); }
+
+/* Order numbers: least → greatest */
+.math-order {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+}
+
+.math-order-seq {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.order-slot {
+  width: 52px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-size: 24px;
+  color: var(--mc-xp);
+  text-shadow: var(--shadow-text);
+  background: #000;
+  border: 3px dashed var(--mc-stone-dark);
+}
+
+.order-slot--filled {
+  border-style: solid;
+  border-top-color:    var(--mc-green-light);
+  border-left-color:   var(--mc-green-light);
+  border-right-color:  var(--mc-green-dark);
+  border-bottom-color: var(--mc-green-dark);
+}
+
+.order-lt {
+  font-family: var(--font-main);
+  font-size: 18px;
+  color: var(--mc-text-dim);
+}
+
+.math-order-tiles {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.order-tile {
+  width: 60px;
+  height: 60px;
+  font-family: var(--font-main);
+  font-size: 24px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+  background: var(--mc-stone);
+  border: 3px solid #000;
+  border-top-color:    var(--mc-stone-light);
+  border-left-color:   var(--mc-stone-light);
+  border-right-color:  var(--mc-stone-dark);
+  border-bottom-color: var(--mc-stone-dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+.order-tile:active { filter: brightness(0.9); }
+
+.order-tile--placed {
+  opacity: 0.35;
+  cursor: default;
+}
 
 .math-problem-prompt--question {
   font-size: 18px;
