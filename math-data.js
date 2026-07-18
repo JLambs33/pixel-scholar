@@ -183,16 +183,123 @@ const MATH_LIBRARY = [
     },
   },
 
+  // ── Telling Time (M1-90) ──────────────────────────────────────
+  // Read an analog clock (o'clock / half-past) and pick the digital time.
+  {
+    id: 'telling-time',
+    grade: 'grade1',
+    topic: 'time',
+    title: 'What Time Is It?',
+    blurb: 'Read the clock',
+    count: 6,
+    generate() {
+      const hour = mathRandInt(1, 12);
+      const minute = Math.random() < 0.5 ? 0 : 30;
+      const answer = mathTimeStr(hour, minute);
+      const choices = new Set([answer]);
+      while (choices.size < 4) {
+        choices.add(mathTimeStr(mathRandInt(1, 12), Math.random() < 0.5 ? 0 : 30));
+      }
+      return {
+        input: 'choice',
+        question: 'What time is it?',
+        visual: { type: 'clock', values: [hour, minute] },
+        answer,
+        choices: mathShuffle([...choices]),
+      };
+    },
+  },
+
+  // ── Read a Bar Graph (M1-99 / M1-100) ─────────────────────────
+  // Read counts off a bar chart: "how many" (number pad) or
+  // "which most / fewest" (choice tiles).
+  {
+    id: 'bar-graph',
+    grade: 'grade1',
+    topic: 'data',
+    title: 'Read the Graph',
+    blurb: 'Answer from the bar chart',
+    count: 6,
+    generate() {
+      const qType = mathPick(['count', 'most', 'fewest']);
+      let data;
+      do {
+        const cats = mathShuffle([...DATA_LABELS]).slice(0, 4);
+        data = cats.map(label => ({ label, value: mathRandInt(1, 8) }));
+      } while (!uniqueExtreme(data, qType));
+
+      if (qType === 'count') {
+        const target = mathPick(data);
+        return {
+          input: 'pad',
+          question: `How many ${target.label}?`,
+          visual: { type: 'bar-chart', values: data },
+          answer: target.value,
+        };
+      }
+      const sorted = [...data].sort((a, b) => a.value - b.value);
+      const answer = (qType === 'most' ? sorted[sorted.length - 1] : sorted[0]).label;
+      return {
+        input: 'choice',
+        question: qType === 'most' ? 'Which has the most?' : 'Which has the fewest?',
+        visual: { type: 'bar-chart', values: data },
+        answer,
+        choices: mathShuffle(data.map(d => d.label)),
+      };
+    },
+  },
+
+  // ── Order Numbers: Least to Greatest (M1-37) ──────────────────
+  // Tap three distinct numbers in increasing order.
+  {
+    id: 'order-numbers',
+    grade: 'grade1',
+    topic: 'order',
+    title: 'Least to Greatest',
+    blurb: 'Tap in order, smallest first',
+    count: 6,
+    generate() {
+      const set = new Set();
+      while (set.size < 3) set.add(mathRandInt(1, 20));
+      const numbers = mathShuffle([...set]);
+      return {
+        input: 'order',
+        question: 'Tap from least to greatest',
+        numbers,
+        answer: [...numbers].sort((a, b) => a - b),
+        visual: null,
+      };
+    },
+  },
+
 ];
+
+// True when the relevant extreme (most/fewest) is a single unambiguous bar.
+function uniqueExtreme(data, qType) {
+  if (qType === 'count') return true;
+  const vals = data.map(d => d.value);
+  const target = qType === 'most' ? Math.max(...vals) : Math.min(...vals);
+  return vals.filter(v => v === target).length === 1;
+}
 
 // Minecraft flavor for word problems.
 const MATH_MOBS  = ['creepers', 'pigs', 'cows', 'chickens', 'sheep', 'zombies', 'skeletons'];
 const MATH_AWAY  = ['wander off', 'run away', 'despawn'];
 const MATH_ITEMS = ['diamonds', 'apples', 'torches', 'arrows', 'cookies', 'emeralds', 'carrots'];
 const MATH_NAMES = ['Steve', 'Alex', 'Zoe', 'Max'];
+// Short labels so bar-chart columns stay legible without wrapping.
+const DATA_LABELS = ['Gold', 'Iron', 'Coal', 'Wood', 'Rock', 'Fish'];
 
 function mathPick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function mathShuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+function mathTimeStr(hour, minute) {
+  return `${hour}:${minute === 0 ? '00' : '30'}`;
 }
 
 // Build a fixed-length set of problems for a lesson, avoiding immediate repeats.
@@ -203,7 +310,7 @@ function buildProblemSet(lesson) {
   while (set.length < lesson.count && guard < lesson.count * 30) {
     guard++;
     const p = lesson.generate();
-    const key = p.prompt || p.story;
+    const key = p.prompt || p.story || `${p.question || ''}|${p.answer}`;
     if (seen.has(key)) continue;
     seen.add(key);
     set.push(p);
