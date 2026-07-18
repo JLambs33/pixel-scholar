@@ -174,13 +174,31 @@ const mathGame = (() => {
     renderProblem();
   }
 
+  // Render a sentence as tap-to-hear word tokens (reuses reading's pattern).
+  function storyTokensHTML(text) {
+    return text.trim().split(/\s+/).map(token => {
+      const word = token.replace(/[^a-zA-Z']/g, '');
+      return `<button class="word-token" data-word="${escHtml(word)}">${escHtml(token)}</button>`;
+    }).join(' ');
+  }
+
   function renderProblem() {
     const p = ms.problems[ms.problemIndex];
     if (!p) { endSession(); return; }
     inputLocked = false;
     clearAnswer();
-    document.getElementById('math-problem-prompt').textContent = `${p.prompt} =`;
-    document.getElementById('math-problem-visual').innerHTML = renderVisual(p.visual);
+
+    const story = document.getElementById('math-problem-story');
+    if (p.story) {
+      document.getElementById('math-story-tokens').innerHTML = storyTokensHTML(p.story);
+      story.classList.remove('hidden');
+      document.getElementById('math-problem-prompt').textContent = '';
+      document.getElementById('math-problem-visual').innerHTML = '';
+    } else {
+      story.classList.add('hidden');
+      document.getElementById('math-problem-prompt').textContent = `${p.prompt} =`;
+      document.getElementById('math-problem-visual').innerHTML = renderVisual(p.visual);
+    }
   }
 
   function checkAnswer(value) {
@@ -266,6 +284,16 @@ const mathGame = (() => {
     document.getElementById('math-number-pad').addEventListener('click', e => {
       const btn = e.target.closest('.num-key');
       if (btn) pressKey(btn.dataset.key);
+    });
+
+    // Word problems: read whole problem aloud, and tap-to-hear per word
+    document.getElementById('math-read-aloud-btn').addEventListener('click', () => {
+      const p = ms.problems[ms.problemIndex];
+      if (p && p.story) speech.speak(p.story);
+    });
+    document.getElementById('math-story-tokens').addEventListener('click', e => {
+      const btn = e.target.closest('.word-token');
+      if (btn && btn.dataset.word) speech.speak(btn.dataset.word);
     });
 
     // Keyboard support while the game screen is active
