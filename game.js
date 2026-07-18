@@ -21,7 +21,7 @@ function getWordsFromTextarea() {
 // ============================================================
 //  Screen navigation
 // ============================================================
-const SCREENS = ['home-screen', 'parent-screen', 'reading-screen', 'game-screen', 'reading-game-screen', 'champion-screen', 'bonus-screen'];
+const SCREENS = ['home-screen', 'parent-screen', 'reading-screen', 'math-screen', 'game-screen', 'reading-game-screen', 'math-game-screen', 'champion-screen', 'bonus-screen'];
 
 // Tracks which learning module is currently active; used for post-session navigation.
 var currentModule = 'spelling';
@@ -30,8 +30,15 @@ function showScreen(id) {
   SCREENS.forEach(s =>
     document.getElementById(s).classList.toggle('hidden', s !== id)
   );
-  const setupScreens = ['parent-screen', 'reading-screen'];
+  const setupScreens = ['parent-screen', 'reading-screen', 'math-screen'];
   document.getElementById('home-btn').classList.toggle('hidden', !setupScreens.includes(id));
+}
+
+// The setup screen a module returns to (Play Again / Change / bonus exit).
+function setupScreenFor(module) {
+  return module === 'reading' ? 'reading-screen'
+       : module === 'math'    ? 'math-screen'
+       : 'parent-screen';
 }
 
 // ============================================================
@@ -573,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bonusHorde.stopGame();
     bonusElytra.stopGame();
     renderParentBestScores();
-    showScreen(currentModule === 'reading' ? 'reading-screen' : 'parent-screen');
+    showScreen(setupScreenFor(currentModule));
   }
   bonusHomeBtn.addEventListener('click',    onBonusHome);
   bonusHomeBtn.addEventListener('touchend', (e) => { e.preventDefault(); onBonusHome(); });
@@ -586,6 +593,10 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen('reading-screen');
   });
 
+  document.getElementById('module-math').addEventListener('click', () => {
+    showScreen('math-screen');
+  });
+
   document.getElementById('home-btn').addEventListener('click', () => {
     showScreen('home-screen');
   });
@@ -595,11 +606,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('play-again-btn').addEventListener('click', () => {
     awaitingInput = false;
-    showScreen(currentModule === 'reading' ? 'reading-screen' : 'parent-screen');
+    showScreen(setupScreenFor(currentModule));
   });
 
   document.getElementById('change-words-btn').addEventListener('click', () => {
     awaitingInput = false;
-    showScreen(currentModule === 'reading' ? 'reading-screen' : 'parent-screen');
+    showScreen(setupScreenFor(currentModule));
   });
 });
