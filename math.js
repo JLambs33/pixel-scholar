@@ -40,6 +40,7 @@ const mathGame = (() => {
       const isSelected = selectedLesson && selectedLesson.id === l.id;
       const sym = l.topic === 'subtract' ? '&minus;'
                 : l.topic === 'time'     ? '&#128336;'
+                : l.topic === 'data'     ? '&#128202;'
                 : '+';
       return `
         <div class="math-lesson-item${isSelected ? ' math-lesson-item--selected' : ''}"
@@ -117,7 +118,26 @@ const mathGame = (() => {
     if (visual.type === 'ten-frame')   return tenFrameHTML(visual.values);
     if (visual.type === 'number-path') return numberPathHTML(visual.values);
     if (visual.type === 'clock')       return clockSVG(visual.values[0], visual.values[1]);
+    if (visual.type === 'bar-chart')   return barChartHTML(visual.values);
     return '';
+  }
+
+  // values: [{label, value}]. Vertical bars read against a 0..max y-axis
+  // (no numbers on the bars, so "how many" requires reading the chart).
+  function barChartHTML(data) {
+    const UNIT = 22;
+    const max = Math.max(...data.map(d => d.value), 1);
+    let axis = '';
+    for (let v = max; v >= 0; v--) axis += `<div class="bar-tick">${v}</div>`;
+    const bars = data.map(d =>
+      `<div class="bar-col">
+         <div class="bar" style="height:${d.value * UNIT}px"></div>
+         <span class="bar-label">${escHtml(d.label)}</span>
+       </div>`).join('');
+    return `<div class="bar-chart">
+      <div class="bar-axis" style="height:${max * UNIT}px">${axis}</div>
+      <div class="bar-plot" style="height:${max * UNIT}px;background-size:100% ${UNIT}px">${bars}</div>
+    </div>`;
   }
 
   // Analog clock face with hour + minute hands (values: [hour, minute]).
@@ -223,31 +243,34 @@ const mathGame = (() => {
     clearAnswer();
 
     const mode    = p.input || 'pad';
-    const story   = document.getElementById('math-problem-story');
-    const prompt  = document.getElementById('math-problem-prompt');
     const usesPad = mode === 'pad';
+    const isWord  = usesPad && !!p.story;
+    const prompt  = document.getElementById('math-problem-prompt');
+    const visual  = document.getElementById('math-problem-visual');
 
-    // Toggle the input widgets for this problem's mode.
+    // Toggle the input widgets and story panel for this problem.
     document.getElementById('math-answer-slots').classList.toggle('hidden', !usesPad);
     document.getElementById('math-number-pad').classList.toggle('hidden', !usesPad);
     document.getElementById('math-choices').classList.toggle('hidden', mode !== 'choice');
-    prompt.classList.toggle('math-problem-prompt--question', !usesPad);
+    document.getElementById('math-problem-story').classList.toggle('hidden', !isWord);
 
-    if (mode === 'choice') {
-      story.classList.add('hidden');
-      document.getElementById('math-problem-visual').innerHTML = renderVisual(p.visual);
-      prompt.textContent = p.question;
-      renderChoices(p.choices);
-    } else if (p.story) {
-      story.classList.remove('hidden');
+    if (isWord) {
       document.getElementById('math-story-tokens').innerHTML = storyTokensHTML(p.story);
       prompt.textContent = '';
-      document.getElementById('math-problem-visual').innerHTML = '';
-    } else {
-      story.classList.add('hidden');
-      prompt.textContent = `${p.prompt} =`;
-      document.getElementById('math-problem-visual').innerHTML = renderVisual(p.visual);
+      prompt.classList.remove('math-problem-prompt--question');
+      visual.innerHTML = '';
+      return;
     }
+
+    visual.innerHTML = renderVisual(p.visual);
+    if (p.question) {
+      prompt.textContent = p.question;
+      prompt.classList.add('math-problem-prompt--question');
+    } else {
+      prompt.textContent = `${p.prompt} =`;
+      prompt.classList.remove('math-problem-prompt--question');
+    }
+    if (mode === 'choice') renderChoices(p.choices);
   }
 
   function checkAnswer(value) {

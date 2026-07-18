@@ -1378,6 +1378,15 @@ html, body {
   border-bottom-color: #4A90B8;
 }
 
+.math-topic-chip--data {
+  font-size: 16px;
+  background: #7E57C2;
+  border-top-color:    #B39DDB;
+  border-left-color:   #B39DDB;
+  border-right-color:  #4D2C91;
+  border-bottom-color: #4D2C91;
+}
+
 .math-lesson-item:hover {
   filter: brightness(1.2);
 }
@@ -1526,6 +1535,68 @@ html, body {
 .clock-hour   { stroke: #000;             stroke-width: 6; stroke-linecap: round; }
 .clock-minute { stroke: var(--mc-wrong);  stroke-width: 4; stroke-linecap: round; }
 .clock-pin    { fill: var(--mc-gold); stroke: #000; stroke-width: 2; }
+
+/* Bar chart */
+.bar-chart {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.bar-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  min-width: 16px;
+  padding-right: 6px;
+  border-right: 3px solid var(--mc-stone-dark);
+}
+
+.bar-tick {
+  font-family: var(--font-main);
+  font-size: 10px;
+  color: var(--mc-text-dim);
+  line-height: 0;
+}
+
+.bar-plot {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 0 6px;
+  border-bottom: 3px solid var(--mc-stone-dark);
+  background-image: repeating-linear-gradient(
+    to top, transparent, transparent calc(100% - 1px), rgba(255,255,255,0.12) 100%);
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.bar {
+  width: 40px;
+  background: var(--mc-green-light);
+  border: 2px solid #000;
+  border-top-color:    #A6E24C;
+  border-left-color:   #A6E24C;
+  border-right-color:  var(--mc-green-dark);
+  border-bottom-color: var(--mc-green-dark);
+}
+
+.bar-label {
+  font-family: var(--font-main);
+  font-size: 9px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+  margin-top: 6px;
+  text-align: center;
+  white-space: nowrap;
+}
 
 /* Multiple-choice answer tiles */
 .math-choices {
