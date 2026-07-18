@@ -1548,47 +1548,58 @@ html, body {
 /* Bar chart */
 .bar-chart {
   display: flex;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 4px;
   justify-content: center;
-  align-items: flex-end;
 }
 
 .bar-axis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
+  position: relative;
   min-width: 16px;
   padding-right: 6px;
   border-right: 3px solid var(--mc-stone-dark);
 }
 
 .bar-tick {
+  position: absolute;
+  right: 6px;
+  transform: translateY(50%);
   font-family: var(--font-main);
   font-size: 10px;
   color: var(--mc-text-dim);
-  line-height: 0;
+  line-height: 1;
 }
 
 .bar-plot {
+  position: relative;
+  border-bottom: 3px solid var(--mc-stone-dark);
+}
+
+.grid-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed rgba(255, 255, 255, 0.4);
+}
+
+.bar-cols {
+  position: relative;
   display: flex;
   align-items: flex-end;
-  gap: 12px;
-  padding: 0 6px;
-  border-bottom: 3px solid var(--mc-stone-dark);
-  background-image: repeating-linear-gradient(
-    to top, transparent, transparent calc(100% - 1px), rgba(255,255,255,0.12) 100%);
+  gap: 14px;
+  height: 100%;
+  padding: 0 10px;
 }
 
 .bar-col {
+  width: 40px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
+  align-items: flex-end;
+  height: 100%;
 }
 
 .bar {
-  width: 40px;
+  width: 100%;
   background: var(--mc-green-light);
   border: 2px solid #000;
   border-top-color:    #A6E24C;
@@ -1597,12 +1608,18 @@ html, body {
   border-bottom-color: var(--mc-green-dark);
 }
 
+.bar-labels {
+  display: flex;
+  gap: 14px;
+  padding: 6px 10px 0;
+}
+
 .bar-label {
+  width: 40px;
   font-family: var(--font-main);
   font-size: 9px;
   color: var(--mc-text);
   text-shadow: var(--shadow-text);
-  margin-top: 6px;
   text-align: center;
   white-space: nowrap;
 }

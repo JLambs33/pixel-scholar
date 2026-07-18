@@ -125,19 +125,26 @@ const mathGame = (() => {
 
   // values: [{label, value}]. Vertical bars read against a 0..max y-axis
   // (no numbers on the bars, so "how many" requires reading the chart).
+  // Bars sit on the baseline; gridlines + axis numbers align at each unit,
+  // and each bar's top lands exactly on a gridline.
   function barChartHTML(data) {
-    const UNIT = 22;
+    const UNIT = 26;
     const max = Math.max(...data.map(d => d.value), 1);
-    let axis = '';
-    for (let v = max; v >= 0; v--) axis += `<div class="bar-tick">${v}</div>`;
+    const H = max * UNIT;
+    let ticks = '', grid = '';
+    for (let v = 0; v <= max; v++) {
+      ticks += `<span class="bar-tick" style="bottom:${v * UNIT}px">${v}</span>`;
+      if (v > 0) grid += `<div class="grid-line" style="bottom:${v * UNIT}px"></div>`;
+    }
     const bars = data.map(d =>
-      `<div class="bar-col">
-         <div class="bar" style="height:${d.value * UNIT}px"></div>
-         <span class="bar-label">${escHtml(d.label)}</span>
-       </div>`).join('');
+      `<div class="bar-col"><div class="bar" style="height:${d.value * UNIT}px"></div></div>`).join('');
+    const labels = data.map(d => `<span class="bar-label">${escHtml(d.label)}</span>`).join('');
     return `<div class="bar-chart">
-      <div class="bar-axis" style="height:${max * UNIT}px">${axis}</div>
-      <div class="bar-plot" style="height:${max * UNIT}px;background-size:100% ${UNIT}px">${bars}</div>
+      <div class="bar-axis" style="height:${H}px">${ticks}</div>
+      <div class="bar-body">
+        <div class="bar-plot" style="height:${H}px">${grid}<div class="bar-cols">${bars}</div></div>
+        <div class="bar-labels">${labels}</div>
+      </div>
     </div>`;
   }
 
