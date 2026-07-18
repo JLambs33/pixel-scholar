@@ -1379,6 +1379,68 @@ html, body {
   display: none;
 }
 
+/* Ten-frame model */
+.ten-frames {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ten-frame {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  background: #000;
+  border: 3px solid var(--mc-stone-dark);
+  padding: 2px;
+}
+
+.tf-cell {
+  width: 26px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--mc-stone-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tf-dot {
+  width: 16px;
+  height: 16px;
+}
+
+.tf-dot--a { background: var(--mc-green-light); }
+.tf-dot--b { background: var(--mc-gold); }
+
+/* Number path model */
+.number-path {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+}
+
+.np-cell {
+  min-width: 34px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-size: 12px;
+  color: var(--mc-text);
+  text-shadow: var(--shadow-text);
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--mc-stone-dark);
+}
+
+.np-cell--start {
+  border-color: var(--mc-gold);
+  background: rgba(255, 170, 0, 0.2);
+  color: var(--mc-gold);
+}
+
 .math-problem-prompt {
   font-size: 34px;
   color: var(--mc-text);

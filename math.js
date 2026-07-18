@@ -103,6 +103,51 @@ const mathGame = (() => {
     return typedDigits.length ? parseInt(typedDigits.join(''), 10) : null;
   }
 
+  // ── concrete-model visuals ────────────────────────────────────
+  // Rendered above the prompt to match the worksheets' ten-frames and
+  // number paths. Driven by the generator's `visual` descriptor; absent
+  // or unknown → empty string (container collapses via CSS).
+
+  function renderVisual(visual) {
+    if (!visual) return '';
+    if (visual.type === 'ten-frame')   return tenFrameHTML(visual.values);
+    if (visual.type === 'number-path') return numberPathHTML(visual.values);
+    return '';
+  }
+
+  // values: [a, b] (two addends, two colors) or [n] (single amount).
+  // Dots fill left-to-right across one or two ten-frames.
+  function tenFrameHTML(values) {
+    const total      = values.reduce((a, b) => a + b, 0);
+    const firstCount = values[0];
+    const frames     = Math.min(2, Math.max(1, Math.ceil(total / 10)));
+    let cells = '';
+    for (let f = 0; f < frames; f++) {
+      let frame = '';
+      for (let c = 0; c < 10; c++) {
+        const idx = f * 10 + c;
+        const dot = idx < total
+          ? `<span class="tf-dot tf-dot--${idx < firstCount ? 'a' : 'b'}"></span>`
+          : '';
+        frame += `<div class="tf-cell">${dot}</div>`;
+      }
+      cells += `<div class="ten-frame">${frame}</div>`;
+    }
+    return `<div class="ten-frames">${cells}</div>`;
+  }
+
+  // values: [minuend, sub]. Number path with the start (minuend) highlighted;
+  // the child counts back to find the answer (answer is not pre-marked).
+  function numberPathHTML(values) {
+    const minuend = values[0];
+    const lo = Math.max(1, minuend - 6);
+    let cells = '';
+    for (let n = lo; n <= minuend; n++) {
+      cells += `<div class="np-cell${n === minuend ? ' np-cell--start' : ''}">${n}</div>`;
+    }
+    return `<div class="number-path">${cells}</div>`;
+  }
+
   // ── session flow ──────────────────────────────────────────────
 
   function startSession() {
@@ -133,9 +178,7 @@ const mathGame = (() => {
     inputLocked = false;
     clearAnswer();
     document.getElementById('math-problem-prompt').textContent = `${p.prompt} =`;
-    // Concrete-model visuals (ten-frame / number path) are rendered by ps-17;
-    // the container stays empty until then and collapses via CSS.
-    document.getElementById('math-problem-visual').innerHTML = '';
+    document.getElementById('math-problem-visual').innerHTML = renderVisual(p.visual);
   }
 
   function checkAnswer(value) {
