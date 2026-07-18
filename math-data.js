@@ -116,7 +116,84 @@ const MATH_LIBRARY = [
     },
   },
 
+  // ── Add Story Problems (M1-115 flavor) ────────────────────────
+  // "There are 9 creepers. 5 more spawn. How many now?" — 9+n / 8+n.
+  {
+    id: 'add-word',
+    grade: 'grade1',
+    topic: 'add',
+    title: 'Add Story Problems',
+    blurb: 'Read and add the mobs',
+    count: 6,
+    generate() {
+      const a = Math.random() < 0.5 ? 9 : 8;
+      const b = mathRandInt(2, 9);
+      const mob = mathPick(MATH_MOBS);
+      return {
+        story: `There are ${a} ${mob}. Then ${b} more ${mob} spawn. How many ${mob} are there now?`,
+        answer: a + b,
+        visual: null,
+      };
+    },
+  },
+
+  // ── Subtract Story Problems (M1-15 flavor) ────────────────────
+  // "There are 15 pigs. 7 wander off. How many are left?" — make 10.
+  {
+    id: 'subtract-word',
+    grade: 'grade1',
+    topic: 'subtract',
+    title: 'Subtract Story Problems',
+    blurb: 'Read and take some away',
+    count: 6,
+    generate() {
+      const minuend = mathRandInt(11, 18);
+      const ones = minuend - 10;
+      const sub = mathRandInt(ones + 1, 9);
+      const mob = mathPick(MATH_MOBS);
+      const away = mathPick(MATH_AWAY);
+      return {
+        story: `There are ${minuend} ${mob}. Then ${sub} ${mob} ${away}. How many ${mob} are left?`,
+        answer: minuend - sub,
+        visual: null,
+      };
+    },
+  },
+
+  // ── Comparison Story Problems (M1-45 flavor) ──────────────────
+  // "Steve has 12 diamonds. Alex has 5. How many more does Steve have?"
+  {
+    id: 'compare-word',
+    grade: 'grade1',
+    topic: 'subtract',
+    title: 'Compare — More or Fewer',
+    blurb: 'Read and find the difference',
+    count: 6,
+    generate() {
+      const big = mathRandInt(6, 18);
+      const small = mathRandInt(1, big - 1);
+      const item = mathPick(MATH_ITEMS);
+      const names = [...MATH_NAMES];
+      const n1 = names.splice(Math.floor(Math.random() * names.length), 1)[0];
+      const n2 = names.splice(Math.floor(Math.random() * names.length), 1)[0];
+      const story = Math.random() < 0.5
+        ? `${n1} has ${big} ${item}. ${n2} has ${small} ${item}. How many more ${item} does ${n1} have?`
+        : `${n1} has ${big} ${item}. ${n2} has ${small} ${item}. How many fewer ${item} does ${n2} have?`;
+      return { story, answer: big - small, visual: null };
+    },
+  },
+
 ];
+
+// Minecraft flavor for word problems.
+const MATH_MOBS  = ['creepers', 'pigs', 'cows', 'chickens', 'sheep', 'zombies', 'skeletons'];
+const MATH_AWAY  = ['wander off', 'run away', 'despawn'];
+const MATH_ITEMS = ['diamonds', 'apples', 'torches', 'arrows', 'cookies', 'emeralds', 'carrots'];
+const MATH_NAMES = ['Steve', 'Alex', 'Zoe', 'Max'];
+
+function mathPick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
 // Build a fixed-length set of problems for a lesson, avoiding immediate repeats.
 function buildProblemSet(lesson) {
@@ -126,8 +203,9 @@ function buildProblemSet(lesson) {
   while (set.length < lesson.count && guard < lesson.count * 30) {
     guard++;
     const p = lesson.generate();
-    if (seen.has(p.prompt)) continue;
-    seen.add(p.prompt);
+    const key = p.prompt || p.story;
+    if (seen.has(key)) continue;
+    seen.add(key);
     set.push(p);
   }
   return set;
