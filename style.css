@@ -416,7 +416,8 @@ html, body {
 }
 
 #mob-canvas,
-#reading-mob-canvas {
+#reading-mob-canvas,
+#math-mob-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
